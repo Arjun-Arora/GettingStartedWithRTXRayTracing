@@ -40,9 +40,9 @@
 #include <libgen.h>
 #include <errno.h>
 #include <algorithm>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <dlfcn.h>
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 namespace Falcor
 {

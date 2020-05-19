@@ -29,8 +29,8 @@
 #include "Utils/Platform/OS.h"
 #include "Utils/StringUtils.h"
 #include <fstream>
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 namespace Falcor
 {
