@@ -61,6 +61,7 @@ public:
 	virtual bool appliesPostprocess() { return false; }      // Does your pass apply a postprocess?
 	virtual bool usesEnvironmentMap() { return false; }      // Does your pass use an environment map?
 	virtual bool hasAnimation()       { return true;  }      // Controls if "freeze animation" GUI is shown (should generally leave as true)
+	virtual bool hasGathering()       { return false;  }     // Controls if "data gather" GUI is shown (should generally leave as false)
 
 
     //

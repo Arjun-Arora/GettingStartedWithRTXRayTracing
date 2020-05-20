@@ -44,6 +44,7 @@ protected:
 	// Override some functions that provide information to the RenderPipeline class
 	bool appliesPostprocess() override { return true; }
 	bool hasAnimation() override { return false; }
+	bool hasGathering() override { return true; }
 
 	// A helper utility to determine if the current scene (if any) has had any camera motion
 	bool hasCameraMoved();
@@ -61,9 +62,18 @@ protected:
 	Scene::SharedPtr              mpScene;
 	mat4                          mpLastCameraMatrix;
 
+	// modified to false by default
 	// Is our accumulation enabled?
-	bool                          mDoAccumulation = true;
+	bool                          mDoAccumulation = false;
+	// pass control flag for data gathering
+	bool                          mDoGathering = false;
 
 	// How many frames have we accumulated so far?
 	uint32_t                      mAccumCount = 0;
+
+	// gather data for every mGatherRate frames
+	uint32_t                      mGatherRate = 10;
+	// Data Gathering Counters
+	uint32_t                      mDataCount = 0;
+	uint32_t                      mFrameCount = 0;
 };

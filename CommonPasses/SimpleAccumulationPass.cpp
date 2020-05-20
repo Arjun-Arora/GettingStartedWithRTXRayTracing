@@ -86,6 +86,13 @@ void SimpleAccumulationPass::renderGui(Gui* pGui)
         setRefreshFlag();
     }
 
+	// Add a toggle to start/end gathering data.  Whenever this toggles, reset the gathered data index to 0
+	if (pGui->addCheckBox(mDoGathering ? "Start gathering" : "Stopped gathering", mDoGathering))
+	{
+		mDataCount = 0;
+		setRefreshFlag();
+	}
+
 	// Display a count of accumulated frames
 	pGui->addText("");
 	pGui->addText((std::string("Frames accumulated: ") + std::to_string(mAccumCount)).c_str());
@@ -119,6 +126,26 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 	shaderVars["PerFrameCB"]["gAccumCount"] = mAccumCount++;
 	shaderVars["gLastFrame"] = mpLastFrame;
 	shaderVars["gCurFrame"]  = inputTexture;
+
+	// gathering
+	{
+		if (mDoGathering && !(mFrameCount % mGatherRate))
+		{
+			// Do gather 
+
+			/*Texture::SharedPtr WorldPosition = mpResManager->getTexture("WorldPosition");
+			Texture::SharedPtr WorldNormal = mpResManager->getTexture("WorldNormal");
+			Texture::SharedPtr MaterialDiffuse = mpResManager->getTexture("MaterialDiffuse");
+			Texture::SharedPtr MaterialSpecRough = mpResManager->getTexture("MaterialSpecRough");
+			Texture::SharedPtr MaterialExtraParams = mpResManager->getTexture("MaterialExtraParams");
+			Texture::SharedPtr Emissive = mpResManager->getTexture("Emissive");
+
+			WorldPosition->captureToFile(0, 0, "WorldPosition-" + std::to_string(mDataCount) + ".png");*/
+
+			mDataCount++;
+		}
+		mFrameCount++;
+	}
 
     // Do the accumulation
     mpAccumShader->execute(pRenderContext, mpGfxState);
