@@ -10,6 +10,7 @@ FalcorRT.VC.VC.opendb
 *.orig
 /pink_room/*
 *.VC.db
-/Falcor/Framework/Externals/
+/Falcor/Framework/Externals/*
+!/Falcor/Framework/Externals/dear_imgui_addons
 /Falcor/Media/
 /Falcor/Framework/Lib/debugdxr/Falcor.lib
