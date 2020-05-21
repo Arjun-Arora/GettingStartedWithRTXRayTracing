@@ -24,53 +24,60 @@
 class SimpleAccumulationPass : public ::RenderPass, inherit_shared_from_this<::RenderPass, SimpleAccumulationPass>
 {
 public:
-    using SharedPtr = std::shared_ptr<SimpleAccumulationPass>;
-    using SharedConstPtr = std::shared_ptr<const SimpleAccumulationPass>;
+	using SharedPtr = std::shared_ptr<SimpleAccumulationPass>;
+	using SharedConstPtr = std::shared_ptr<const SimpleAccumulationPass>;
 
-    static SharedPtr create(const std::string &bufferToAccumulate) { return SharedPtr(new SimpleAccumulationPass(bufferToAccumulate)); }
-    virtual ~SimpleAccumulationPass() = default;
+	static SharedPtr create(const std::string& bufferToAccumulate,
+		const std::string& bufferHalfToAccumulate) {
+		return SharedPtr(new SimpleAccumulationPass(bufferToAccumulate, bufferHalfToAccumulate));
+	}
+	virtual ~SimpleAccumulationPass() = default;
 
 protected:
-	SimpleAccumulationPass(const std::string &bufferToAccumulate);
+	SimpleAccumulationPass(const std::string& bufferToAccumulate, const std::string& bufferHalfToAccumulate);
 
-    // Implementation of SimpleRenderPass interface
+	// Implementation of SimpleRenderPass interface
 	bool initialize(RenderContext* pRenderContext, ResourceManager::SharedPtr pResManager) override;
 	void initScene(RenderContext* pRenderContext, Scene::SharedPtr pScene) override;
-    void execute(RenderContext* pRenderContext) override;
-    void renderGui(Gui* pGui) override;
-    void resize(uint32_t width, uint32_t height) override;
+	void execute(RenderContext* pRenderContext) override;
+	void renderGui(Gui* pGui) override;
+	void resize(uint32_t width, uint32_t height) override;
 	void stateRefreshed() override;
 
 	// Override some functions that provide information to the RenderPipeline class
 	bool appliesPostprocess() override { return true; }
 	bool hasAnimation() override { return false; }
-	bool hasGathering() override { return true; }
 
 	// A helper utility to determine if the current scene (if any) has had any camera motion
 	bool hasCameraMoved();
 
-    // Information about the rendering texture we're accumulating into
+	// Information about the rendering texture we're accumulating into
 	std::string                   mAccumChannel;
+	std::string                   mHalfAccumChannel;
 
 	// State for our accumulation shader
 	FullscreenLaunch::SharedPtr   mpAccumShader;
 	GraphicsState::SharedPtr      mpGfxState;
+
+	FullscreenLaunch::SharedPtr   mpHalfAccumShader;
+	GraphicsState::SharedPtr      mpHalfGfxState;
+
 	Texture::SharedPtr            mpLastFrame;
 	Fbo::SharedPtr                mpInternalFbo;
+
+	Texture::SharedPtr            mpHalfLastFrame;
+	Fbo::SharedPtr                mpHalfInternalFbo;
 
 	// We stash a copy of our current scene.  Why?  To detect if changes have occurred.
 	Scene::SharedPtr              mpScene;
 	mat4                          mpLastCameraMatrix;
 
-	// modified to false by default
 	// Is our accumulation enabled?
 	bool                          mDoAccumulation = false;
-	// pass control flag for data gathering
 	bool                          mDoGathering = false;
 
 	// How many frames have we accumulated so far?
 	uint32_t                      mAccumCount = 0;
-
 	// gather data for every mGatherRate frames
 	uint32_t                      mGatherRate = 10;
 	// Data Gathering Counters

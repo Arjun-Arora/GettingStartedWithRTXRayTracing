@@ -26,19 +26,19 @@
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
 	// Create our rendering pipeline
-	RenderingPipeline *pipeline = new RenderingPipeline();
+	RenderingPipeline* pipeline = new RenderingPipeline();
 
 	// Add passes into our pipeline
 	pipeline->setPass(0, LightProbeGBufferPass::create());
-	pipeline->setPass(1, GGXGlobalIlluminationPass::create("HDRColorOutput"));  // Output our result to "HDRColorOutput"
-	pipeline->setPass(2, SimpleAccumulationPass::create("HDRColorOutput"));     // Accumulate on "HDRColorOutput"
-	pipeline->setPass(3, SimpleToneMappingPass::create("HDRColorOutput", ResourceManager::kOutputChannel));  // Tonemap "HDRColorOutput" to the output channel
+	pipeline->setPass(1, GGXGlobalIlluminationPass::create("HDRColorOutput", "HDRHalfColorOutput"));  // Output our result to "HDRColorOutput"
+	pipeline->setPass(2, SimpleAccumulationPass::create("HDRColorOutput", "HDRHalfColorOutput"));     // Accumulate on "HDRColorOutput"
+	pipeline->setPass(3, SimpleToneMappingPass::create("HDRColorOutput", "HDRHalfColorOutput", ResourceManager::kOutputChannel));  // Tonemap "HDRColorOutput" to the output channel
 
 	// Define a set of config / window parameters for our program
-    SampleConfig config;
+	SampleConfig config;
 	config.windowDesc.title = "Tutorial 14:  Swap out a Lambertian BRDF for a more complex GGX BRDF model.";
 	config.windowDesc.resizableWindow = true;
-	config.windowDesc.width = 1920; 
+	config.windowDesc.width = 1920;
 	config.windowDesc.height = 1080;
 
 	// Start our program!

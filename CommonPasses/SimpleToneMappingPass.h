@@ -23,26 +23,32 @@
 class SimpleToneMappingPass : public ::RenderPass, inherit_shared_from_this<::RenderPass, SimpleToneMappingPass>
 {
 public:
-    using SharedPtr = std::shared_ptr<SimpleToneMappingPass>;
-    using SharedConstPtr = std::shared_ptr<const SimpleToneMappingPass>;
+	using SharedPtr = std::shared_ptr<SimpleToneMappingPass>;
+	using SharedConstPtr = std::shared_ptr<const SimpleToneMappingPass>;
 
-    static SharedPtr create(const std::string &inBuf, const std::string &outBuf) { return SharedPtr(new SimpleToneMappingPass(inBuf, outBuf)); }
-    virtual ~SimpleToneMappingPass() = default;
+	static SharedPtr create(const std::string& inBuf, const std::string& inHalfBuf, const std::string& outBuf) { return SharedPtr(new SimpleToneMappingPass(inBuf, inHalfBuf, outBuf)); }
+	virtual ~SimpleToneMappingPass() = default;
 
 protected:
-	SimpleToneMappingPass(const std::string &inBuf, const std::string &outBuf);
+	SimpleToneMappingPass(const std::string& inBuf, const std::string& inHalfBuf, const std::string& outBuf);
 
-    // Implementation of SimpleRenderPass interface
+	// Implementation of SimpleRenderPass interface
 	bool initialize(RenderContext* pRenderContext, ResourceManager::SharedPtr pResManager) override;
-    void execute(RenderContext* pRenderContext) override;
-    void renderGui(Gui* pGui) override;
+	void execute(RenderContext* pRenderContext) override;
+	void renderGui(Gui* pGui) override;
 
 	// Override some functions that provide information to the RenderPipeline class
 	bool appliesPostprocess() override { return true; }
 
-      
+
 	GraphicsState::SharedPtr    mpGfxState;
 	std::string                 mInChannel;         ///< What resource are we expecting as our input?
+
+	GraphicsState::SharedPtr    mpHalfGfxState;
+	std::string                 mHalfInChannel;         ///< What resource are we expecting as our input?
+
 	std::string                 mOutChannel;        ///< What resource should we dump our output into?
 	ToneMapping::SharedPtr      mpToneMapper;       ///< Falcor's utility class for tone-mapping.
+
+	bool                        mPickHalfRes = false;
 };
