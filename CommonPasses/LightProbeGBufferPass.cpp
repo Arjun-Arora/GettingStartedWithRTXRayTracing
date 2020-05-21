@@ -44,11 +44,11 @@ bool LightProbeGBufferPass::initialize(RenderContext* pRenderContext, ResourceMa
 
 	// We write to these textures; tell our resource manager that we expect them
 	mpResManager->requestTextureResource("WorldPosition");
-	mpResManager->requestTextureResource("WorldNormal", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("MaterialDiffuse", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("MaterialSpecRough", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("MaterialExtraParams", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("Emissive", ResourceFormat::RGBA16Float);
+	mpResManager->requestTextureResource("WorldNormal", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("MaterialDiffuse", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("MaterialSpecRough", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("MaterialExtraParams", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("Emissive", ResourceFormat::RGBA32Float);
 
 	// Create our wrapper around a ray tracing pass.  Tell it where our shaders are, then compile/link the program
 	mpRays = RayLaunch::create(kFileRayTrace, kEntryPointRayGen);

@@ -662,6 +662,9 @@ void RenderingPipeline::onFrameRender(SampleCallbacks* pSample, const RenderCont
 		mGlobalPipeRefresh = false;
 	}
 
+	// check mFreeze Flag
+	pSample->freezeTime(mFreezeTime);
+
     // Execute all of the passes in the current pipeline
     for (uint32_t passNum = 0; passNum < mActivePasses.size(); passNum++)
     {

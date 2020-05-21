@@ -13,3 +13,4 @@ FalcorRT.VC.VC.opendb
 /Falcor/Framework/Externals/
 /Falcor/Media/
 /Falcor/Framework/Lib/debugdxr/Falcor.lib
+*.exr
