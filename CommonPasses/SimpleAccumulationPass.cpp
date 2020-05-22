@@ -22,7 +22,6 @@ namespace {
 	const char* kAccumShader = "CommonPasses\\accumulate.ps.hlsl";
 };
 
-}
 
 SimpleAccumulationPass::SimpleAccumulationPass(const std::string& bufferToAccumulate,const std::string& bufferHalfToAccumulate, RenderingPipeline* pipeline)
 	: ::RenderPass("Accumulation Pass", "Accumulation Options"), mpRenderingPipeline(pipeline)
