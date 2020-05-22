@@ -44,33 +44,48 @@ class TracerDataset(Dataset):
 
     @classmethod
     def build_dataset_csv(cls, src_folder: str):
-        src_file_denoise_format = "Clean"
-        src_file_gbuff_format = ["MaterialDiffuse", "MaterialIoR",
-                                 "MaterialSpecRough", "WorldNormal", "WorldPosition"]
-        src_file_rt_full_1spp = ""
-        src_file_rt_half_0_5spp = ""
+        if not os.path.exists(os.path.join(src_folder, "data.csv")):
+            src_file_denoise_format = "Clean"
+            src_file_gbuff_format = ["MaterialDiffuse", "MaterialIoR",
+                                     "MaterialSpecRough", "WorldNormal", "WorldPosition"]
+            src_file_rt_full_1spp = "Full"
+            src_file_rt_half_0_5spp = "Half"
 
-        data = {'clean': [], 'mat_diffuse': [], 'mat_ref': [],
-                'mat_spec_rough': [], "world_normal": [], "world_pos": []}
-        files = os.listdir(src_folder)
-        for file in files:
-            file_type = file.split('-')[0]
-            idx = int(file.split('-')[-1].split('.')[0])
+            data = {'clean': {}, 'full': {}, 'half': {}, 'mat_diffuse': {}, 'mat_ref': {},
+                    'mat_spec_rough': {}, "world_normal": {}, "world_pos": {}}
+            files = os.listdir(src_folder)
+            for file in files:
+                file_type = file.split('-')[0]
+                idx = int(file.split('-')[-1].split('.')[0])
 
-            if file_type == src_file_denoise_format:
-                data['clean'].insert(idx, file)
-            elif file_type == src_file_gbuff_format[0]:
-                data['mat_diffuse'].insert(idx, file)
-            elif file_type == src_file_gbuff_format[1]:
-                data['mat_ref'].insert(idx, file)
-            elif file_type == src_file_gbuff_format[2]:
-                data['mat_spec_rough'].insert(idx, file)
-            elif file_type == src_file_gbuff_format[3]:
-                data['world_normal'].insert(idx, file)
-            elif file_type == src_file_gbuff_format[4]:
-                data['world_pos'].insert(idx, file)
-            else:
-                raise NotImplementedError
+                if file_type == src_file_denoise_format:
+                    data['clean'][idx] = file
+                elif file_type == src_file_rt_full_1spp:
+                    data['full'][idx] = file
+                elif file_type == src_file_rt_half_0_5spp:
+                    data['half'][idx] = file
+                elif file_type == src_file_gbuff_format[0]:
+                    data['mat_diffuse'][idx] = file
+                elif file_type == src_file_gbuff_format[1]:
+                    data['mat_ref'][idx] = file
+                elif file_type == src_file_gbuff_format[2]:
+                    data['mat_spec_rough'][idx] = file
+                elif file_type == src_file_gbuff_format[3]:
+                    data['world_normal'][idx] = file
+                elif file_type == src_file_gbuff_format[4]:
+                    data['world_pos'][idx] = file
+                else:
+                    raise NotImplementedError
 
-        df = pd.DataFrame(data=data)
-        df.to_csv(os.path.join(src_folder, "data.csv"), index=False)
+            for key, value in data.items():
+                idx = list(value.keys())
+                fh = list(value.values())
+
+                zipped_lists = zip(idx, fh)
+                sorted_zipped_lists = sorted(zipped_lists)
+
+                sorted_list = [handle for _, handle in sorted_zipped_lists]
+                data[key] = sorted_list
+
+            df = pd.DataFrame(data=data)
+            df.to_csv(os.path.join(src_folder, "data.csv"), index=False)
