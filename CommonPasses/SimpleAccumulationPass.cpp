@@ -93,6 +93,7 @@ void SimpleAccumulationPass::renderGui(Gui* pGui)
     }
 
 	// Add a toggle to start/end gathering data.  Whenever this toggles, reset the gathered data index to 0
+	// fix button
 	if (pGui->addCheckBox(mDoGathering ? "Start gathering" : "Stopped gathering", mDoGathering))
 	{
 		mDataCount = 0;
