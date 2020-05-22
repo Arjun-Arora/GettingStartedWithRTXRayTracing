@@ -1,10 +1,9 @@
-import numpy as np
-
 import os
-import OpenEXR, Imath
 
+import Imath
+import OpenEXR
+import numpy as np
 import pandas as pd
-
 import torch
 from torch.utils.data import Dataset
 
