@@ -63,6 +63,10 @@ public:
 	virtual bool onMouseEvent(SampleCallbacks* pSample, const MouseEvent& mouseEvent) override;
 	virtual void onGuiRender(SampleCallbacks* pSample, Gui* pGui) override;
 	virtual void onDroppedFile(SampleCallbacks* pSample, const std::string& filename) override {}
+
+	// time freeze public function
+	void FreezeCam() { mpScene->getPath(0)->detachObject(mpScene->getActiveCamera()); mFreezeTime = true; }
+	void unFreezeCam() { mpScene->getPath(0)->attachObject(mpScene->getActiveCamera()); mFreezeTime = false; }
     
 protected:
 	/** When a new scene is loaded, this gets called to let any passes in this pipeline know there's a new scene.

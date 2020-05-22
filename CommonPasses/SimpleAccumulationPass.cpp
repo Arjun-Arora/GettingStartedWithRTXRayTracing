@@ -29,6 +29,12 @@ SimpleAccumulationPass::SimpleAccumulationPass(const std::string& bufferToAccumu
 	mHalfAccumChannel = bufferHalfToAccumulate;
 }
 
+SimpleAccumulationPass::SimpleAccumulationPass(const std::string& bufferToAccumulate, RenderingPipeline* pipeline)
+	: ::RenderPass("Accumulation Pass", "Accumulation Options"), mpRenderingPipeline(pipeline)
+{
+	mAccumChannel = bufferToAccumulate;
+}
+
 bool SimpleAccumulationPass::initialize(RenderContext* pRenderContext, ResourceManager::SharedPtr pResManager)
 {
 	if (!pResManager) return false;
@@ -139,22 +145,52 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 	HalfshaderVars["gLastFrame"] = mpHalfLastFrame;
 	HalfshaderVars["gCurFrame"] = inputHalfTexture;
 
+    // Do the accumulation
+    mpAccumShader->execute(pRenderContext, mpGfxState);
+
+    // We've accumulated our result.  Copy that back to the input/output buffer
+    pRenderContext->blit(mpInternalFbo->getColorTexture(0)->getSRV(), inputTexture->getRTV());
+
 	// gathering
 	{
-		if (mDoGathering && !(mFrameCount % mGatherRate))
+		if (mDoGathering && mDataCount < mMaxDataNum)
 		{
-			// Do gather
 
-			/*Texture::SharedPtr WorldPosition = mpResManager->getTexture("WorldPosition");
-			Texture::SharedPtr WorldNormal = mpResManager->getTexture("WorldNormal");
-			Texture::SharedPtr MaterialDiffuse = mpResManager->getTexture("MaterialDiffuse");
-			Texture::SharedPtr MaterialSpecRough = mpResManager->getTexture("MaterialSpecRough");
-			Texture::SharedPtr MaterialExtraParams = mpResManager->getTexture("MaterialExtraParams");
-			Texture::SharedPtr Emissive = mpResManager->getTexture("Emissive");
-			WorldPosition->captureToFile(0, 0, "WorldPosition-" + std::to_string(mDataCount) + ".png");*/
+			if (!(mFrameCount % mGatherRate))
+			{
+				// accumulation for animated scene
+				// start cam animation
+				if (mAccumCount >= mTargetGroundTruthSpp)
+				{
+					// Gather for G buffer
+					Texture::SharedPtr WorldPosition = mpResManager->getTexture("WorldPosition");
+					Texture::SharedPtr WorldNormal = mpResManager->getTexture("WorldNormal");
+					Texture::SharedPtr MaterialDiffuse = mpResManager->getTexture("MaterialDiffuse");
+					Texture::SharedPtr MaterialSpecRough = mpResManager->getTexture("MaterialSpecRough");
+					Texture::SharedPtr MaterialIoR = mpResManager->getTexture("MaterialExtraParams");
+					Texture::SharedPtr Emissive = mpResManager->getTexture("Emissive");
 
-			mDataCount++;
-		}
+					WorldPosition->captureToFile(0, 0, "WorldPosition-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					WorldNormal->captureToFile(0, 0, "WorldNormal-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					MaterialDiffuse->captureToFile(0, 0, "MaterialDiffuse-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					MaterialSpecRough->captureToFile(0, 0, "MaterialSpecRough-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					MaterialIoR->captureToFile(0, 0, "MaterialIoR-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					//Emissive->captureToFile(0, 0, "Emissive-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+
+					// Gather accumulated clean image
+					inputTexture->captureToFile(0, 0, "Clean-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+
+					mDataCount++;
+
+					mpRenderingPipeline->unFreezeCam();
+				}
+				// freeze cam animation
+				else
+				{
+					mpRenderingPipeline->FreezeCam();
+					mFrameCount--;
+				}
+			}		}
 		mFrameCount++;
 	}
 
@@ -169,6 +205,7 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 	// Keep a copy for next frame (we need this to avoid reading & writing to the same resource)
 	pRenderContext->blit(mpInternalFbo->getColorTexture(0)->getSRV(), mpLastFrame->getRTV());
 	pRenderContext->blit(mpHalfInternalFbo->getColorTexture(0)->getSRV(), mpHalfLastFrame->getRTV());
+
 }
 
 void SimpleAccumulationPass::stateRefreshed()

@@ -33,6 +33,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	pipeline->setPass(1, GGXGlobalIlluminationPass::create("HDRColorOutput", "HDRHalfColorOutput"));  // Output our result to "HDRColorOutput"
 	pipeline->setPass(2, SimpleAccumulationPass::create("HDRColorOutput", "HDRHalfColorOutput"));     // Accumulate on "HDRColorOutput"
 	pipeline->setPass(3, SimpleToneMappingPass::create("HDRColorOutput", "HDRHalfColorOutput", ResourceManager::kOutputChannel));  // Tonemap "HDRColorOutput" to the output channel
+urceManager::kOutputChannel));  // Tonemap "HDRColorOutput" to the output channel
 
 	// Define a set of config / window parameters for our program
 	SampleConfig config;

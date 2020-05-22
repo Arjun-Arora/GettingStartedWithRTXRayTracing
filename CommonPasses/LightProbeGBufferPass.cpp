@@ -42,12 +42,13 @@ bool LightProbeGBufferPass::initialize(RenderContext* pRenderContext, ResourceMa
 	mpResManager = pResManager;
 
 	// We write to these textures; tell our resource manager that we expect them
-	mpResManager->requestTextureResource("WorldPosition", ResourceFormat::RGBA32Float);
-	mpResManager->requestTextureResource("WorldNormal", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("MaterialDiffuse", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("MaterialSpecRough", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("MaterialExtraParams", ResourceFormat::RGBA16Float);
-	mpResManager->requestTextureResource("Emissive", ResourceFormat::RGBA16Float);
+
+	mpResManager->requestTextureResource("WorldPosition");
+	mpResManager->requestTextureResource("WorldNormal", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("MaterialDiffuse", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("MaterialSpecRough", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("MaterialExtraParams", ResourceFormat::RGBA32Float);
+	mpResManager->requestTextureResource("Emissive", ResourceFormat::RGBA32Float);
 
 
 	mpResManager->requestTextureResource("HalfWorldPosition", ResourceFormat::RGBA32Float, mpResManager->kDefaultFlags, 960, 540);

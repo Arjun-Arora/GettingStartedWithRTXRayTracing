@@ -20,6 +20,7 @@
 #include "../SharedUtils/RenderPass.h"
 #include "../SharedUtils/SimpleVars.h"
 #include "../SharedUtils/FullscreenLaunch.h"
+#include "../SharedUtils/RenderingPipeline.h"
 
 class SimpleAccumulationPass : public ::RenderPass, inherit_shared_from_this<::RenderPass, SimpleAccumulationPass>
 {
@@ -27,14 +28,14 @@ public:
 	using SharedPtr = std::shared_ptr<SimpleAccumulationPass>;
 	using SharedConstPtr = std::shared_ptr<const SimpleAccumulationPass>;
 
-	static SharedPtr create(const std::string& bufferToAccumulate,
-		const std::string& bufferHalfToAccumulate) {
-		return SharedPtr(new SimpleAccumulationPass(bufferToAccumulate, bufferHalfToAccumulate));
-	}
-	virtual ~SimpleAccumulationPass() = default;
+
+	static SharedPtr create(const std::string& bufferToAccumulate) { return SharedPtr(new SimpleAccumulationPass(bufferToAccumulate)); }
+	static SharedPtr create(const std::string& bufferToAccumulate,const std::string& bufferHalfToAccumulate, RenderingPipeline* pipeline) { return SharedPtr(new SimpleAccumulationPass(bufferToAccumulate,bufferHalfToAccumulate, pipeline)); }
+    virtual ~SimpleAccumulationPass() = default;
 
 protected:
-	SimpleAccumulationPass(const std::string& bufferToAccumulate, const std::string& bufferHalfToAccumulate);
+	SimpleAccumulationPass(const std::string& bufferToAccumulate);
+	SimpleAccumulationPass(const std::string &bufferToAccumulate,const std::string& bufferHalfToAccumulate, RenderingPipeline* pipeline);
 
 	// Implementation of SimpleRenderPass interface
 	bool initialize(RenderContext* pRenderContext, ResourceManager::SharedPtr pResManager) override;
@@ -79,8 +80,12 @@ protected:
 	// How many frames have we accumulated so far?
 	uint32_t                      mAccumCount = 0;
 	// gather data for every mGatherRate frames
-	uint32_t                      mGatherRate = 10;
+	uint32_t                      mGatherRate = 4;
+	uint32_t                      mTargetGroundTruthSpp = 64;
 	// Data Gathering Counters
 	uint32_t                      mDataCount = 0;
+	uint32_t                      mMaxDataNum = 5;
 	uint32_t                      mFrameCount = 0;
+private:
+	RenderingPipeline*  mpRenderingPipeline;
 };

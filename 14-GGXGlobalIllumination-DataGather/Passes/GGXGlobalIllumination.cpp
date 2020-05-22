@@ -90,7 +90,8 @@ void GGXGlobalIlluminationPass::initScene(RenderContext* pRenderContext, Scene::
 void GGXGlobalIlluminationPass::renderGui(Gui* pGui)
 {
 	int dirty = 0;
-	dirty |= (int)pGui->addIntVar("Max RayDepth", mUserSpecifiedRayDepth, 0, mMaxPossibleRayDepth);
+	int32_t depth = mUserSpecifiedRayDepth;
+	dirty |= (int)pGui->addIntVar("Max RayDepth", depth, 0, mMaxPossibleRayDepth);
 	dirty |= (int)pGui->addCheckBox(mDoDirectGI ? "Compute direct illumination" : "Skipping direct illumination",
 		mDoDirectGI);
 	dirty |= (int)pGui->addCheckBox(mDoIndirectGI ? "Shooting global illumination rays" : "Skipping global illumination",
