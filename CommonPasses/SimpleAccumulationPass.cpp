@@ -19,19 +19,15 @@
 #include "SimpleAccumulationPass.h"
 
 namespace {
-    const char *kAccumShader = "CommonPasses\\accumulate.ps.hlsl";
+	const char* kAccumShader = "CommonPasses\\accumulate.ps.hlsl";
 };
 
-SimpleAccumulationPass::SimpleAccumulationPass(const std::string &bufferToAccumulate)
-	: ::RenderPass("Accumulation Pass", "Accumulation Options")
-{
-	mAccumChannel = bufferToAccumulate;
-}
 
-SimpleAccumulationPass::SimpleAccumulationPass(const std::string& bufferToAccumulate, RenderingPipeline* pipeline)
+SimpleAccumulationPass::SimpleAccumulationPass(const std::string& bufferToAccumulate,const std::string& bufferHalfToAccumulate, RenderingPipeline* pipeline)
 	: ::RenderPass("Accumulation Pass", "Accumulation Options"), mpRenderingPipeline(pipeline)
 {
 	mAccumChannel = bufferToAccumulate;
+	mHalfAccumChannel = bufferHalfToAccumulate;
 }
 
 bool SimpleAccumulationPass::initialize(RenderContext* pRenderContext, ResourceManager::SharedPtr pResManager)
@@ -41,10 +37,14 @@ bool SimpleAccumulationPass::initialize(RenderContext* pRenderContext, ResourceM
 	// Stash our resource manager; ask for the texture the developer asked us to accumulate
 	mpResManager = pResManager;
 	mpResManager->requestTextureResource(mAccumChannel);
+	mpResManager->requestTextureResource(mHalfAccumChannel);
 
 	// Create our graphics state and accumulation shader
 	mpGfxState = GraphicsState::create();
 	mpAccumShader = FullscreenLaunch::create(kAccumShader);
+
+	mpHalfGfxState = GraphicsState::create();
+	mpHalfAccumShader = FullscreenLaunch::create(kAccumShader);
 
 	// Our GUI needs less space than other passes, so shrink the GUI window.
 	setGuiSize(ivec2(250, 135));
@@ -67,22 +67,28 @@ void SimpleAccumulationPass::initScene(RenderContext* pRenderContext, Scene::Sha
 
 void SimpleAccumulationPass::resize(uint32_t width, uint32_t height)
 {
-    // Resize internal resources
-    mpLastFrame = Texture::create2D(width, height, ResourceFormat::RGBA32Float, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess | Resource::BindFlags::RenderTarget);
+	// Resize internal resources
+	mpLastFrame = Texture::create2D(width, height, ResourceFormat::RGBA32Float, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess | Resource::BindFlags::RenderTarget);
+	mpHalfLastFrame = Texture::create2D(width / 2, height / 2, ResourceFormat::RGBA32Float, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess | Resource::BindFlags::RenderTarget);
 
-    // We need a framebuffer to attach to our graphics pipe state (when running our full-screen pass)
+	// We need a framebuffer to attach to our graphics pipe state (when running our full-screen pass)
 	mpInternalFbo = ResourceManager::createFbo(width, height, ResourceFormat::RGBA32Float);
-    mpGfxState->setFbo(mpInternalFbo);
+	mpHalfInternalFbo = ResourceManager::createFbo(width / 2, height / 2, ResourceFormat::RGBA32Float);
 
-    // Whenever we resize, we'd better force accumulation to restart
+	mpGfxState->setFbo(mpInternalFbo);
+	mpHalfGfxState->setFbo(mpHalfInternalFbo);
+
+	// Whenever we resize, we'd better force accumulation to restart
 	mAccumCount = 0;
 }
 
 void SimpleAccumulationPass::renderGui(Gui* pGui)
 {
 	// Print the name of the buffer we're accumulating from and into.  Add a blank line below that for clarity
-    pGui->addText( (std::string("Accumulating buffer:   ") + mAccumChannel).c_str() );
-    pGui->addText("");  
+	pGui->addText((std::string("Accumulating buffer:   ") + mAccumChannel).c_str());
+	pGui->addText((std::string("Accumulating buffer:   ") + mHalfAccumChannel).c_str());
+
+	pGui->addText("");
 
 	// Add a toggle to enable/disable temporal accumulation.  Whenever this toggles, reset the
 	//     frame count and tell the pipeline we're part of that our rendering options have changed.
@@ -109,18 +115,20 @@ bool SimpleAccumulationPass::hasCameraMoved()
 {
 	// Has our camera moved?
 	return mpScene &&                      // No scene?  Then the answer is no
-		   mpScene->getActiveCamera() &&   // No camera in our scene?  Then the answer is no
-		   (mpLastCameraMatrix != mpScene->getActiveCamera()->getViewMatrix());   // Compare the current matrix with the last one
+		mpScene->getActiveCamera() &&   // No camera in our scene?  Then the answer is no
+		(mpLastCameraMatrix != mpScene->getActiveCamera()->getViewMatrix());   // Compare the current matrix with the last one
 }
 
 void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 {
-    // Grab the texture to accumulate
+	// Grab the texture to accumulate
 	Texture::SharedPtr inputTexture = mpResManager->getTexture(mAccumChannel);
 
+	Texture::SharedPtr inputHalfTexture = mpResManager->getTexture(mHalfAccumChannel);
+
 	// If our input texture is invalid, or we've been asked to skip accumulation, do nothing.
-    if (!inputTexture || !mDoAccumulation) return;
-   
+	if (!inputTexture || !mDoAccumulation || !inputHalfTexture) return;
+
 	// If the camera in our current scene has moved, we want to reset accumulation
 	if (hasCameraMoved())
 	{
@@ -128,11 +136,17 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 		mpLastCameraMatrix = mpScene->getActiveCamera()->getViewMatrix();
 	}
 
-    // Set shader parameters for our accumulation
+	// Set shader parameters for our accumulation
 	auto shaderVars = mpAccumShader->getVars();
 	shaderVars["PerFrameCB"]["gAccumCount"] = mAccumCount++;
 	shaderVars["gLastFrame"] = mpLastFrame;
-	shaderVars["gCurFrame"]  = inputTexture;
+	shaderVars["gCurFrame"] = inputTexture;
+
+	auto HalfshaderVars = mpHalfAccumShader->getVars();
+	//accum count incremented above
+	HalfshaderVars["PerFrameCB"]["gAccumCount"] = mAccumCount;
+	HalfshaderVars["gLastFrame"] = mpHalfLastFrame;
+	HalfshaderVars["gCurFrame"] = inputHalfTexture;
 
     // Do the accumulation
     mpAccumShader->execute(pRenderContext, mpGfxState);
@@ -144,6 +158,7 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 	{
 		if (mDoGathering && mDataCount < mMaxDataNum)
 		{
+
 			if (!(mFrameCount % mGatherRate))
 			{
 				// accumulation for animated scene
@@ -178,13 +193,22 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 					mpRenderingPipeline->FreezeCam();
 					mFrameCount--;
 				}
-			}
-		}
+			}		}
 		mFrameCount++;
 	}
 
-    // Keep a copy for next frame (we need this to avoid reading & writing to the same resource)
-    pRenderContext->blit(mpInternalFbo->getColorTexture(0)->getSRV(), mpLastFrame->getRTV());
+	// Do the accumulation
+	mpAccumShader->execute(pRenderContext, mpGfxState);
+	mpHalfAccumShader->execute(pRenderContext, mpHalfGfxState);
+
+	// We've accumulated our result.  Copy that back to the input/output buffer
+	pRenderContext->blit(mpInternalFbo->getColorTexture(0)->getSRV(), inputTexture->getRTV());
+	pRenderContext->blit(mpHalfInternalFbo->getColorTexture(0)->getSRV(), inputHalfTexture->getRTV());
+
+	// Keep a copy for next frame (we need this to avoid reading & writing to the same resource)
+	pRenderContext->blit(mpInternalFbo->getColorTexture(0)->getSRV(), mpLastFrame->getRTV());
+	pRenderContext->blit(mpHalfInternalFbo->getColorTexture(0)->getSRV(), mpHalfLastFrame->getRTV());
+
 }
 
 void SimpleAccumulationPass::stateRefreshed()
