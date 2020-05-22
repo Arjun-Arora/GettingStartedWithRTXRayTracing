@@ -142,17 +142,17 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 	shaderVars["gLastFrame"] = mpLastFrame;
 	shaderVars["gCurFrame"] = inputTexture;
 
+    // Do the accumulation
+    mpAccumShader->execute(pRenderContext, mpGfxState);
+
+	// Do the half accumulation
 	auto HalfshaderVars = mpHalfAccumShader->getVars();
 	//accum count incremented above
 	HalfshaderVars["PerFrameCB"]["gAccumCount"] = mAccumCount;
 	HalfshaderVars["gLastFrame"] = mpHalfLastFrame;
 	HalfshaderVars["gCurFrame"] = inputHalfTexture;
 
-    // Do the accumulation
-    mpAccumShader->execute(pRenderContext, mpGfxState);
-
-    // We've accumulated our result.  Copy that back to the input/output buffer
-    pRenderContext->blit(mpInternalFbo->getColorTexture(0)->getSRV(), inputTexture->getRTV());
+	mpHalfAccumShader->execute(pRenderContext, mpHalfGfxState);
 
 	// gathering
 	{
@@ -173,15 +173,19 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 					Texture::SharedPtr MaterialIoR = mpResManager->getTexture("MaterialExtraParams");
 					Texture::SharedPtr Emissive = mpResManager->getTexture("Emissive");
 
-					WorldPosition->captureToFile(0, 0, "WorldPosition-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					WorldNormal->captureToFile(0, 0, "WorldNormal-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					MaterialDiffuse->captureToFile(0, 0, "MaterialDiffuse-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					MaterialSpecRough->captureToFile(0, 0, "MaterialSpecRough-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					MaterialIoR->captureToFile(0, 0, "MaterialIoR-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					WorldPosition->captureToFile(0, 0, mDataPath + "WorldPosition-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					WorldNormal->captureToFile(0, 0, mDataPath + "WorldNormal-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					MaterialDiffuse->captureToFile(0, 0, mDataPath + "MaterialDiffuse-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					MaterialSpecRough->captureToFile(0, 0, mDataPath + "MaterialSpecRough-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					MaterialIoR->captureToFile(0, 0, mDataPath + "MaterialIoR-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
 					//Emissive->captureToFile(0, 0, "Emissive-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
 
+					// Gather noisy images
+					mpLastFrame->captureToFile(0, 0, mDataPath + "Full-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					mpHalfLastFrame->captureToFile(0, 0, mDataPath + "Half-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+
 					// Gather accumulated clean image
-					inputTexture->captureToFile(0, 0, "Clean-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					inputTexture->captureToFile(0, 0, mDataPath + "Clean-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
 
 					mDataCount++;
 
@@ -193,13 +197,10 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 					mpRenderingPipeline->FreezeCam();
 					mFrameCount--;
 				}
-			}		}
+			}		
+		}
 		mFrameCount++;
 	}
-
-	// Do the accumulation
-	mpAccumShader->execute(pRenderContext, mpGfxState);
-	mpHalfAccumShader->execute(pRenderContext, mpHalfGfxState);
 
 	// We've accumulated our result.  Copy that back to the input/output buffer
 	pRenderContext->blit(mpInternalFbo->getColorTexture(0)->getSRV(), inputTexture->getRTV());

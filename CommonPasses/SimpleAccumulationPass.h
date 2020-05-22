@@ -83,6 +83,7 @@ protected:
 	uint32_t                      mGatherRate = 4;
 	uint32_t                      mTargetGroundTruthSpp = 64;
 	// Data Gathering Counters
+	std::string                   mDataPath = "./train/";
 	uint32_t                      mDataCount = 0;
 	uint32_t                      mMaxDataNum = 5;
 	uint32_t                      mFrameCount = 0;
