@@ -16,7 +16,7 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **********************************************************************************************************************/
 
-// This render pass is similar to the "SimpleDiffuseGIPass" from Tutorial #12, except it 
+// This render pass is similar to the "SimpleDiffuseGIPass" from Tutorial #12, except it
 //     uses a more complex GGX illumination model (instead of a simple Lambertian model).
 //     The changes mostly affect the HLSL shader code, as the C++ is quite similar
 
@@ -27,29 +27,30 @@
 class GGXGlobalIlluminationPass : public ::RenderPass, inherit_shared_from_this<::RenderPass, GGXGlobalIlluminationPass>
 {
 public:
-    using SharedPtr = std::shared_ptr<GGXGlobalIlluminationPass>;
-    using SharedConstPtr = std::shared_ptr<const GGXGlobalIlluminationPass>;
+	using SharedPtr = std::shared_ptr<GGXGlobalIlluminationPass>;
+	using SharedConstPtr = std::shared_ptr<const GGXGlobalIlluminationPass>;
 
-    static SharedPtr create(const std::string &outChannel) { return SharedPtr(new GGXGlobalIlluminationPass(outChannel)); }
-    virtual ~GGXGlobalIlluminationPass() = default;
+	static SharedPtr create(const std::string& outChannel, const std::string& outHalfChannel) { return SharedPtr(new GGXGlobalIlluminationPass(outChannel, outHalfChannel)); }
+	virtual ~GGXGlobalIlluminationPass() = default;
 
 protected:
-	GGXGlobalIlluminationPass(const std::string &outChannel) : mOutputTextureName(outChannel),
+	GGXGlobalIlluminationPass(const std::string& outChannel, const std::string& outHalfChannel) : mOutputTextureName(outChannel), mOutputHalfTextureName(outHalfChannel),
 		::RenderPass("Global Illum., GGX BRDF", "GGX Global Illumination Options") {}
 
-    // Implementation of RenderPass interface
-    bool initialize(RenderContext* pRenderContext, ResourceManager::SharedPtr pResManager) override;
-    void initScene(RenderContext* pRenderContext, Scene::SharedPtr pScene) override;
-    void execute(RenderContext* pRenderContext) override;
+	// Implementation of RenderPass interface
+	bool initialize(RenderContext* pRenderContext, ResourceManager::SharedPtr pResManager) override;
+	void initScene(RenderContext* pRenderContext, Scene::SharedPtr pScene) override;
+	void execute(RenderContext* pRenderContext) override;
 	void renderGui(Gui* pGui) override;
 
 	// Override some functions that provide information to the RenderPipeline class
 	bool requiresScene() override { return true; }
 	bool usesRayTracing() override { return true; }
 
-    // Rendering state
+	// Rendering state
 	RayLaunch::SharedPtr    mpRays;                       ///< Our wrapper around a DX Raytracing pass
-    RtScene::SharedPtr      mpScene;                      ///< Our scene file (passed in from app)  
+	RayLaunch::SharedPtr    mpHalfRays;                       ///< Our wrapper around a DX Raytracing pass
+	RtScene::SharedPtr      mpScene;                      ///< Our scene file (passed in from app)
 
 	// Recursive ray tracing can be slow.  Add a toggle to disable, to allow you to manipulate the scene
 	bool                    mDoIndirectGI = true;
@@ -61,7 +62,8 @@ protected:
 
 	// What texture should was ask the resource manager to store our result in?
 	std::string             mOutputTextureName;
-    
+	std::string             mOutputHalfTextureName;
+
 	// Various internal parameters
 	uint32_t                mFrameCount = 0x1337u;        ///< A frame counter to vary random numbers over time
 };
