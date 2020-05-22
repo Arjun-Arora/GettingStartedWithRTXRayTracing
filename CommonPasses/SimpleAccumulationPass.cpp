@@ -173,19 +173,22 @@ void SimpleAccumulationPass::execute(RenderContext* pRenderContext)
 					Texture::SharedPtr MaterialIoR = mpResManager->getTexture("MaterialExtraParams");
 					Texture::SharedPtr Emissive = mpResManager->getTexture("Emissive");
 
-					WorldPosition->captureToFile(0, 0, mDataPath + "WorldPosition-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					WorldNormal->captureToFile(0, 0, mDataPath + "WorldNormal-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					MaterialDiffuse->captureToFile(0, 0, mDataPath + "MaterialDiffuse-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					MaterialSpecRough->captureToFile(0, 0, mDataPath + "MaterialSpecRough-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					MaterialIoR->captureToFile(0, 0, mDataPath + "MaterialIoR-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					Bitmap::ExportFlags exportFlag = Bitmap::ExportFlags::Uncompressed;
+					Bitmap::FileFormat fileFormat = Bitmap::FileFormat::ExrFile;
+
+					WorldPosition->captureToFile(0, 0, mDataPath + "WorldPosition-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
+					WorldNormal->captureToFile(0, 0, mDataPath + "WorldNormal-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
+					MaterialDiffuse->captureToFile(0, 0, mDataPath + "MaterialDiffuse-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
+					MaterialSpecRough->captureToFile(0, 0, mDataPath + "MaterialSpecRough-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
+					MaterialIoR->captureToFile(0, 0, mDataPath + "MaterialIoR-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
 					//Emissive->captureToFile(0, 0, "Emissive-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
 
 					// Gather noisy images
-					mpLastFrame->captureToFile(0, 0, mDataPath + "Full-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
-					mpHalfLastFrame->captureToFile(0, 0, mDataPath + "Half-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					inputTexture->captureToFile(0, 0, mDataPath + "Full-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
+					inputHalfTexture->captureToFile(0, 0, mDataPath + "Half-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
 
 					// Gather accumulated clean image
-					inputTexture->captureToFile(0, 0, mDataPath + "Clean-" + std::to_string(mDataCount) + ".exr", Bitmap::FileFormat::ExrFile);
+					mpLastFrame->captureToFile(0, 0, mDataPath + "Clean-" + std::to_string(mDataCount) + ".exr", fileFormat, exportFlag);
 
 					mDataCount++;
 
