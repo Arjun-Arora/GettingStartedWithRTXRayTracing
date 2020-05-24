@@ -2,6 +2,7 @@ import os
 
 import Imath
 import OpenEXR
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import struct
@@ -90,7 +91,8 @@ def build_dataset_csv(src_folder: str):
 def exr_to_tensor(exr_filepath: str, half: bool) -> torch.Tensor:
     image = OpenEXR.InputFile(exr_filepath)
     channels = image.header()['channels'].keys()
-    img_dim = (len(channels), image.header()['dataWindow'].max.x + 1, image.header()['dataWindow'].max.y + 1)
+    dw = image.header()['dataWindow']
+    img_dim = (len(channels), dw.max.x - dw.min.x + 1, dw.max.y - dw.min.y + 1)
 
     if half:
         img_array = np.zeros((img_dim[0], img_dim[1] // 2, img_dim[2] // 2))
@@ -99,15 +101,15 @@ def exr_to_tensor(exr_filepath: str, half: bool) -> torch.Tensor:
 
     for i, channel in enumerate(channels):
         ch_bytes = image.channel(channel, Imath.PixelType(Imath.PixelType.FLOAT))
+        ch_np = np.fromstring(ch_bytes, dtype=np.float32)
+        ch_np = ch_np.reshape((img_dim[1], img_dim[2]))
 
-        channel_floats = struct.unpack("f" * img_dim[1] * img_dim[2], ch_bytes)
-
-        inter_array = np.array(channel_floats).reshape(img_dim[1], img_dim[2])
-
-        if half:
-            img_array[i] = inter_array[:img_dim[1]//2, :img_dim[2]//2]
+        if channel == 'R':
+            img_array[0] = ch_np
+        elif channel == 'G':
+            img_array[1] = ch_np
         else:
-            img_array[i] = inter_array
+            img_array[2] = ch_np
 
     return torch.tensor(img_array, dtype=torch.float32)
 
