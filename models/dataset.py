@@ -1,7 +1,6 @@
 import os
 
-import Imath
-import OpenEXR
+import pyexr
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -89,29 +88,15 @@ def build_dataset_csv(src_folder: str):
 
 
 def exr_to_tensor(exr_filepath: str, half: bool) -> torch.Tensor:
-    image = OpenEXR.InputFile(exr_filepath)
-    channels = image.header()['channels'].keys()
-    dw = image.header()['dataWindow']
-    img_dim = (len(channels), dw.max.x - dw.min.x + 1, dw.max.y - dw.min.y + 1)
+    image = pyexr.open(exr_filepath)
+    channels = image.channels
+
+    img_array = image.get(precision=image.channel_precision[channels[0]])
 
     if half:
-        img_array = np.zeros((img_dim[0], img_dim[1] // 2, img_dim[2] // 2))
-    else:
-        img_array = np.zeros(img_dim)
+        img_array = img_array[:image.height//2, :image.width//2, :]
 
-    for i, channel in enumerate(channels):
-        ch_bytes = image.channel(channel, Imath.PixelType(Imath.PixelType.FLOAT))
-        ch_np = np.fromstring(ch_bytes, dtype=np.float32)
-        ch_np = ch_np.reshape((img_dim[1], img_dim[2]))
-
-        if channel == 'R':
-            img_array[0] = ch_np
-        elif channel == 'G':
-            img_array[1] = ch_np
-        else:
-            img_array[2] = ch_np
-
-    return torch.tensor(img_array, dtype=torch.float32)
+    return torch.tensor(np.transpose(img_array, (2, 0, 1)), dtype=torch.float32)
 
 
 def convert_exrs_to_tensors(src: str, tgt: str):
@@ -119,7 +104,6 @@ def convert_exrs_to_tensors(src: str, tgt: str):
         file_name, file_type = exr_file_name.split('.')
 
         if file_type == 'exr' and not os.path.exists(os.path.join(tgt, "{name}.pt".format(name=file_name))):
-
             if file_name.split('-')[0] == 'Half':
                 img_tensor = exr_to_tensor(os.path.join(src, exr_file_name), True)
             else:
@@ -131,3 +115,5 @@ def convert_exrs_to_tensors(src: str, tgt: str):
             torch.save(img_tensor, os.path.join(tgt, "{name}.pt".format(name=file_name)))
             print("Image {i}: Converted {name}.exr to {name}.pt".format(i=i, name=file_name))
 
+
+convert_exrs_to_tensors('data', 'processed')
