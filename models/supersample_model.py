@@ -89,3 +89,74 @@ class RDN(nn.Module):
         output = self.conv3(us)
 
         return output
+
+
+def _crop_and_merge(to_crop: torch.Tensor, to_merge_to: torch.Tensor) -> torch.Tensor:
+    padding = [0, 0, to_merge_to.size()[2] - to_crop.size()[2], to_merge_to.size()[3] - to_crop.size()[3]]
+    cropped_to_crop = F.pad(to_crop, padding)
+
+    return torch.cat((cropped_to_crop, to_merge_to), dim=1)
+
+
+class UNet(nn.Module):
+    def __init__(self, depth: int = 5):
+        super(UNet, self).__init__()
+
+        # part 1
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, padding=1, bias=True)
+        self.conv2 = nn.Conv2d(64, 64, kernel_size=3, padding=1, bias=True)
+        self.pool1 = nn.MaxPool2d(2, stride=1, padding=1)
+
+        # part 2
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1, bias=True)
+        self.conv4 = nn.Conv2d(128, 128, kernel_size=3, padding=1, bias=True)
+        self.pool2 = nn.MaxPool2d(2, stride=1, padding=1)
+
+        # part 3
+        self.conv5 = nn.Conv2d(128, 256, kernel_size=3, padding=1, bias=True)
+        self.conv6 = nn.Conv2d(256, 256, kernel_size=3, padding=1, bias=True)
+        self.pool3 = nn.MaxPool2d(2, stride=1, padding=1)
+
+        # part 4
+        self.conv7 = nn.Conv2d(256, 512, kernel_size=3, padding=1, bias=True)
+        self.conv8 = nn.Conv2d(512, 512, kernel_size=3, padding=1, bias=True)
+        self.pool4 = nn.MaxPool2d(2, stride=1, padding=1)
+
+        # part5
+        self.conv9 = nn.Conv2d(512, 1024, kernel_size=3, padding=1, bias=True)
+        self.conv10 = nn.Conv2d(1024, 1024, kernel_size=3, padding=1, bias=True)
+        self.up_conv1 = nn.ConvTranspose2d(1024, 512, kernel_size=2, padding=1, bias=True)
+
+        # part6
+        self.conv11 = nn.Conv2d(1024, 512, kernel_size=3, padding=1, bias=True)
+        self.conv12 = nn.Conv2d(512, 512, kernel_size=3, padding=1, bias=True)
+        self.up_conv2 = nn.ConvTranspose2d(512, 256, kernel_size=2, padding=1, bias=True)
+
+        # part7
+        self.conv13 = nn.Conv2d(512, 256, kernel_size=3, padding=1, bias=True)
+        self.conv14 = nn.Conv2d(256, 256, kernel_size=3, padding=1, bias=True)
+        self.up_conv3 = nn.ConvTranspose2d(256, 128, kernel_size=2, padding=1, bias=True)
+
+        # part8
+        self.conv15 = nn.Conv2d(256, 128, kernel_size=3, padding=1, bias=True)
+        self.conv16 = nn.Conv2d(128, 128, kernel_size=3, padding=1, bias=True)
+        self.up_conv4 = nn.ConvTranspose2d(128, 64, kernel_size=2, padding=1, bias=True)
+
+        # part9
+        self.conv17 = nn.Conv2d(128, 64, kernel_size=3, padding=1, bias=True)
+        self.conv18 = nn.Conv2d(64, 64, kernel_size=3, padding=1, bias=True)
+        self.conv19 = nn.Conv2d(64, 3, kernel_size=1, bias=True)
+
+    def forward(self, x):
+        level_1_down = F.relu(self.conv2(F.relu(self.conv1(x))))
+        level_2_down = F.relu(self.conv4(F.relu(self.conv3(self.pool1(level_1_down)))))
+        level_3_down = F.relu(self.conv6(F.relu(self.conv5(self.pool2(level_2_down)))))
+        level_4_down = F.relu(self.conv8(F.relu(self.conv7(self.pool3(level_3_down)))))
+
+        level_5_up = self.up_conv1(F.relu(self.conv10(F.relu(self.conv9(self.pool4(level_4_down))))))
+        level_6_up = self.up_conv2(F.relu(self.conv12(F.relu(self.conv11(_crop_and_merge(level_4_down, level_5_up))))))
+        level_7_up = self.up_conv3(F.relu(self.conv14(F.relu(self.conv13(_crop_and_merge(level_3_down, level_6_up))))))
+        level_8_up = self.up_conv4(F.relu(self.conv16(F.relu(self.conv15(_crop_and_merge(level_2_down, level_7_up))))))
+        out = self.conv19(F.relu(self.conv18(F.relu(self.conv17(_crop_and_merge(level_1_down, level_8_up))))))
+
+        return F.relu(out)
