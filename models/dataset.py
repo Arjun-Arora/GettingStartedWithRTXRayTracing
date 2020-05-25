@@ -33,7 +33,7 @@ class SupersampleDataset(Dataset):
             data_type = self.fh_frame.columns[i]
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
-                image = torch.load(img_path)
+                image = torch.clamp(torch.load(img_path), 0, 1)
 
                 sample[data_type] = image
 

@@ -25,9 +25,10 @@ def visualize_outputs(to_plot: OrderedDict, epoch: int, batch_i: int, save: bool
         if np_img.shape[0] > 1:
             np_img = np_img[0]
 
-        np_img = np_img.squeeze()
+        np_img = (np_img.squeeze() * 255).astype(np.uint8)
         # if key == 'y_hat':
         #     np_img /= np.max(np_img)
+        print(key, "->", "min:", np.min(np_img), "max:", np.max(np_img))
         ax_arr_imgs[i].imshow(np.transpose(np_img, axes=(1, 2, 0)))
         ax_arr_imgs[i].title.set_text(key)
 
@@ -35,23 +36,39 @@ def visualize_outputs(to_plot: OrderedDict, epoch: int, batch_i: int, save: bool
         plt.savefig('viz_out.png')
 
 
-def plot_loss(loss: float, iteration: int, save: bool):
-    global line, ax_loss, iter_data, loss_data
-    if line is None:
+def tensor_preprocess(img_tensors, downsample_factor=4, difference=False):
+    np_img = img_tensors.numpy()[:, ::downsample_factor, ::downsample_factor]
+    if difference:
+        np_img = np.linalg.norm(np_img, axis=0)
+
+    return np_img
+
+
+def plot_loss(loss: float, iteration: int, save: bool, val: bool):
+    global line1, line2, ax_loss, train_iter_data, train_loss_data, val_iter_data, val_loss_data
+    if line1 is None and line2 is None:
         fig_loss = plt.figure()
         ax_loss = fig_loss.add_subplot(111)
         ax_loss.set_yscale('log')
-        line, = ax_loss.plot([iteration], [loss])
+        line1, line2, = ax_loss.plot([iteration], [loss], [], [])
         plt.title('Loss')
-
-    iter_data.append(iteration)
-    loss_data.append(loss)
 
     ax_loss.relim()
     ax_loss.autoscale()
 
-    line.set_xdata(iter_data)
-    line.set_ydata(loss_data)
+    if val:
+        val_iter_data.append(iteration)
+        val_loss_data.append(loss)
+
+        line2.set_xdata(val_iter_data)
+        line2.set_ydata(val_loss_data)
+    else:
+        train_iter_data.append(iteration)
+        train_loss_data.append(loss)
+
+        line1.set_xdata(train_iter_data)
+        line1.set_ydata(train_loss_data)
+
     plt.pause(0.05)
 
     if save:
@@ -59,4 +76,5 @@ def plot_loss(loss: float, iteration: int, save: bool):
 
 
 f_imgs, ax_arr_imgs = None, None
-line, ax_loss, iter_data, loss_data = None, None, [], []
+line1, line2, ax_loss = None, None, None
+train_iter_data, train_loss_data, val_iter_data, val_loss_data = [], [], [], []
