@@ -1,20 +1,28 @@
 import dataset
 import torch
+import torchvision
 import supersample_model
+import unet
 import viz
 
-import torch.functional as F
+import torch.nn.functional as F
 import numpy as np
+
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, random_split
+from torch.utils.tensorboard import SummaryWriter
 from collections import OrderedDict
 
+torch.manual_seed(348)
+np.random.seed(348)
+
+writer = SummaryWriter('runs/super_res')
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda:0" if use_cuda else "cpu")
 print("Using device", device)
 
-params = {'batch_size': 1, 'shuffle': True, 'num_workers': 1}
+params = {'batch_size': 2, 'shuffle': True, 'num_workers': 2}
 max_epochs = 100
 
 supersample_dataset = dataset.SupersampleDataset('processed')
@@ -28,52 +36,94 @@ train_set, val_set = random_split(supersample_dataset, [train_size, val_size])
 train_gen = DataLoader(train_set, **params)
 val_gen = DataLoader(val_set, **params)
 
-model = supersample_model.UNet().to(device)
-loss_criterion = torch.nn.MSELoss().to(device)
-optimizer = torch.optim.Adam(model.parameters())
+model = supersample_model.ESPCN(2).to(device)
+# model = unet.UNet().to(device)
+loss_criterion = torch.nn.SmoothL1Loss().to(device)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
-iteration = 0
+running_loss = 0
+global_step = 0
 print("Running training.")
 for epoch in range(max_epochs):
-
-    if epoch % 10 == 0:
-        save = True
-    else:
-        save = False
-
     # training
+    loss = 0
     for i, batch in enumerate(train_gen):
-        x, y = batch['half'][:, :, :64, :64].to(device), batch['full'][:, :, :128, :128].to(device)
-        y_hat = model(torch.nn.Upsample(scale_factor=2, mode='bilinear')(x))
-
-        loss = loss_criterion(y_hat, y)
+        y, x = batch['full'][:, :, :1060, :].to(device), batch['half'].to(device)
 
         optimizer.zero_grad()
+
+        y_hat = model(x)
+        loss = loss_criterion(y_hat, y)
         loss.backward()
+
         optimizer.step()
+        running_loss += loss.item()
 
-        if i % 20 == 0:
+        global_step = epoch * len(train_gen) + i
+
+        # visualization of input, output.
+        if global_step % 10 == 0 and global_step > 0:
             with torch.no_grad():
-                to_viz = OrderedDict()
-                to_viz['x'] = x.cpu()
-                to_viz['y_hat'] = y_hat.cpu()
-                to_viz['y'] = y.cpu()
+                writer.add_scalar('Training Loss', running_loss/10, global_step=global_step)
+                running_loss = 0
+        if global_step % 1000 == 0:
+            with torch.no_grad():
+                x_cpu = x.cpu()
+                y_hat_cpu = y_hat.cpu()
+                y_cpu = y.cpu()
 
-                viz.visualize_outputs(to_viz, epoch, i, save)
+                img_grid = torchvision.utils.make_grid(x_cpu)
+                img_grid = viz.tensor_preprocess(img_grid)
+                writer.add_image('Training Input', img_grid, global_step=global_step)
 
-        with torch.no_grad():
-            if iteration % 5 == 0:
-                viz.plot_loss(loss.cpu().item(), iteration, save)
-                print("Loss @ {} iteration:".format(iteration), loss.cpu().item())
+                img_grid = torchvision.utils.make_grid(y_hat_cpu)
+                img_grid = viz.tensor_preprocess(img_grid)
+                writer.add_image('Model Output', img_grid, global_step=global_step)
 
-        # forward pass through model
-        # y_hat = model(x)
+                img_grid = torchvision.utils.make_grid(y_cpu)
+                img_grid = viz.tensor_preprocess(img_grid)
+                writer.add_image('Ground Truth', img_grid, global_step=global_step)
 
-        # print(x.size())
-        # print(y_hat.size())
-        iteration += 1
+                img_grid = torchvision.utils.make_grid(y_cpu - y_hat_cpu)
+                img_grid = viz.tensor_preprocess(img_grid, difference=True)
+                writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss.item()},
+        "model_checkpoints/super_res/exp_smooth_l1_loss_{epoch}.pt".format(epoch=epoch))
+
     with torch.set_grad_enabled(False):
-        for batch in val_gen:
-            x, y = batch['half'].to(device), batch['full'].to(device)
+        running_val_loss = 0
+        x, y, y_hat = None, None, None
+        for j, batch in enumerate(val_gen):
+            x, y = batch['half'].to(device), batch['full'][:, :, :1060, :].to(device)
 
-            # model computations.
+            y_hat = model(x)
+
+            running_val_loss += loss_criterion(y_hat, y).item()
+
+        x_cpu = x.cpu()
+        y_hat_cpu = y_hat.cpu()
+        y_cpu = y.cpu()
+
+        writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
+        running_val_loss = 0
+
+        img_grid = torchvision.utils.make_grid(x_cpu)
+        img_grid = viz.tensor_preprocess(img_grid)
+        writer.add_image('Val Input', img_grid, global_step=global_step)
+
+        img_grid = torchvision.utils.make_grid(y_hat_cpu)
+        img_grid = viz.tensor_preprocess(img_grid)
+        writer.add_image('Val Model Output', img_grid, global_step=global_step)
+
+        img_grid = torchvision.utils.make_grid(y_cpu)
+        img_grid = viz.tensor_preprocess(img_grid)
+        writer.add_image('Val Ground Truth', img_grid, global_step=global_step)
+
+        img_grid = torchvision.utils.make_grid(y_cpu - y_hat_cpu)
+        img_grid = viz.tensor_preprocess(img_grid, difference=True)
+        writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
