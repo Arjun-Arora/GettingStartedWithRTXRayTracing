@@ -41,6 +41,37 @@ class SupersampleDataset(Dataset):
         return sample
 
 
+class DenoiseDataset(Dataset):
+    def __init__(self, src_folder: str):
+        csv_path = os.path.join(src_folder, "data.csv")
+        if not os.path.exists(os.path.join(src_folder, "data.csv")):
+            build_dataset_csv(src_folder)
+
+        self.src_folder = src_folder
+        self.fh_frame = pd.read_csv(csv_path)
+
+        self.data_types_to_fetch = ["full", "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
+
+    def __len__(self):
+        return len(self.fh_frame)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = {}
+
+        for i, fh in enumerate(self.fh_frame.values[idx]):
+            data_type = self.fh_frame.columns[i]
+            if data_type in self.data_types_to_fetch:
+                img_path = os.path.join(self.src_folder, fh)
+                image = torch.clamp(torch.load(img_path), 0, 1)
+
+                sample[data_type] = image
+
+        return sample
+
+
 def build_dataset_csv(src_folder: str):
     src_file_denoise_format = "Clean"
     src_file_gbuff_format = ["MaterialDiffuse", "MaterialIoR",
