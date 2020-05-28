@@ -2,7 +2,6 @@ import dataset
 import torch
 import torchvision
 import supersample_model
-import unet
 import viz
 import torch.nn.functional as F
 import numpy as np
@@ -141,7 +140,7 @@ if __name__ == '__main__':
     train_percentage = 0.9
     num_epochs = 100
     datasetFolder= 'processed'
-    main(seed=348,
+    main(348,
         run_name,
         datasetFolder,
         dataloader_params,
