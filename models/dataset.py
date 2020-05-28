@@ -11,7 +11,7 @@ from torch.utils.data import Dataset
 
 
 class SupersampleDataset(Dataset):
-    def __init__(self, src_folder: str):
+    def __init__(self, src_folder: str,input_types: list):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -19,7 +19,7 @@ class SupersampleDataset(Dataset):
         self.src_folder = src_folder
         self.fh_frame = pd.read_csv(csv_path)
 
-        self.data_types_to_fetch = ["full", "half"]
+        self.data_types_to_fetch = input_types
 
     def __len__(self):
         return len(self.fh_frame)
