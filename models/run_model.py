@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
 from collections import OrderedDict
-#our imports 
-import experiments
+
+# our imports 
+from experiments import SingleImageSuperResolution
 import supersample_model
 
 

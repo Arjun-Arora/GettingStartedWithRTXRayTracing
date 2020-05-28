@@ -2,7 +2,6 @@ import dataset
 import torch
 import torchvision
 import supersample_model
-import unet
 import viz
 import torch.nn.functional as F
 import numpy as np
@@ -15,7 +14,7 @@ from collections import OrderedDict
 def SingleImageSuperResolution(writer,
 							 device,
 							 train_gen,
-							 val_gen
+							 val_gen,
 							 num_epochs):
 	#grab model
     model = supersample_model.ESPCN(2).to(device)
