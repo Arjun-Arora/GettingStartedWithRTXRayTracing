@@ -37,6 +37,8 @@ def SingleImageSuperResolution(writer,
             if len(model_params['input_types']) > 1:
                 x = []
                 for i in model_params['input_types']:
+                    if i == 'half':
+                        x.append(F.interpolate(batch[i],scale_factor=2).to(device))
                     x.append(batch[i].to(device))
                 x = torch.cat(x,dim=1)
             else:
