@@ -17,7 +17,7 @@ def SingleImageSuperResolution(writer,
 							 val_gen,
 							 num_epochs):
 	#grab model
-    model = supersample_model.ESPCN(2).to(device)
+    model = supersample_model.ESPCN(upscale_factor=2, input_channel_size=3, output_channel_size=3).to(device)
     # model = unet.UNet().to(device)
     loss_criterion = torch.nn.SmoothL1Loss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
