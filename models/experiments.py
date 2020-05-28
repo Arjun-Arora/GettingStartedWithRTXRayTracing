@@ -15,9 +15,13 @@ def SingleImageSuperResolution(writer,
 							 device,
 							 train_gen,
 							 val_gen,
-							 num_epochs):
+							 num_epochs,
+                             model_params: dict):
 	#grab model
-    model = supersample_model.ESPCN(upscale_factor=2, input_channel_size=3, output_channel_size=3).to(device)
+
+    model = supersample_model.ESPCN(upscale_factor=model_params['uspcale_factor'],
+                                    input_channel_size=model_params['input_channel_size'],
+                                    output_channel_size=model_params['output_channel_size']).to(device)
     # model = unet.UNet().to(device)
     loss_criterion = torch.nn.SmoothL1Loss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -29,7 +33,15 @@ def SingleImageSuperResolution(writer,
         # training
         loss = 0
         for i, batch in enumerate(train_gen):
-            y, x = batch['full'][:, :, :1060, :].to(device), batch['half'].to(device)
+            #batch["half",'"mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"']
+            if len(model_params['input_types']) > 1:
+                x = []
+                for i in model_params['input_types']:
+                    x.append(batch[i].to(device))
+                x = torch.cat(x,dim=1)
+            else:
+                x = batch[model_params['input_types'][0]]
+            y = batch['full'][:, :, :1060, :].to(device)
 
             optimizer.zero_grad()
 
@@ -108,3 +120,5 @@ def SingleImageSuperResolution(writer,
             img_grid = torchvision.utils.make_grid(y_cpu - y_hat_cpu)
             img_grid = viz.tensor_preprocess(img_grid, difference=True)
             writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+
+def 
