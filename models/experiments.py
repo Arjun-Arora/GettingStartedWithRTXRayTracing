@@ -19,7 +19,7 @@ def SingleImageSuperResolution(writer,
                              model_params: dict):
 	#grab model
 
-    model = supersample_model.ESPCN(upscale_factor=model_params['uspcale_factor'],
+    model = supersample_model.ESPCN(upscale_factor=model_params['upscale_factor'],
                                     input_channel_size=model_params['input_channel_size'],
                                     output_channel_size=model_params['output_channel_size']).to(device)
     # model = unet.UNet().to(device)
@@ -33,7 +33,7 @@ def SingleImageSuperResolution(writer,
         # training
         loss = 0
         for i, batch in enumerate(train_gen):
-            #batch["half",'"mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"']
+            #batch["half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
             if len(model_params['input_types']) > 1:
                 x = []
                 for i in model_params['input_types']:
@@ -42,6 +42,7 @@ def SingleImageSuperResolution(writer,
             else:
                 x = batch[model_params['input_types'][0]]
             y = batch['full'][:, :, :1060, :].to(device)
+            x = x.to(device)
 
             optimizer.zero_grad()
 
@@ -121,4 +122,3 @@ def SingleImageSuperResolution(writer,
             img_grid = viz.tensor_preprocess(img_grid, difference=True)
             writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
 
-def 

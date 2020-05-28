@@ -11,7 +11,7 @@ from torch.utils.data import Dataset
 
 
 class SupersampleDataset(Dataset):
-    def __init__(self, src_folder: str,input_types: list):
+    def __init__(self, src_folder: str, input_types: list):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
