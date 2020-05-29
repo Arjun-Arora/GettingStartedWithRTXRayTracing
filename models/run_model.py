@@ -12,6 +12,7 @@ from collections import OrderedDict
 
 # our imports 
 from experiments import SingleImageSuperResolution
+from experiments import Denoise
 import supersample_model
 
 
@@ -34,7 +35,10 @@ def main(seed: int,
     #grabbing dataset from dataset folder
     if experiment_name == 'SingleImageSuperResolution':
         input_types = ['full', 'half']
-    data = dataset.SupersampleDataset(dataset_folder, input_types)
+        data = dataset.SupersampleDataset(dataset_folder, input_types)
+
+    if experiment_name == 'Denoise':
+        data = dataset.DenoiseDataset(dataset_folder)
 
     #calculating train-val split
     train_size = int(train_percentage * len(data))
@@ -49,6 +53,11 @@ def main(seed: int,
         model_params = {'input_types': ['half'], 'upscale_factor': 2, 
         'input_channel_size': 3, 'output_channel_size': 3}
         SingleImageSuperResolution(writer, device, train_gen, val_gen, num_epochs, model_params)
+
+    if experiment_name == 'Denoise':
+        model_params = {'input_types': ["full", "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],
+        'input_channel_size': 14}
+        Denoise(writer, device, train_gen, val_gen, num_epochs, model_params)
 
 if __name__ == '__main__':
     seed = 348
