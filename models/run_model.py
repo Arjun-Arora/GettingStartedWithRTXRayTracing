@@ -1,3 +1,5 @@
+
+#torch
 import dataset
 import torch
 import torchvision
@@ -5,15 +7,20 @@ import viz
 import torch.nn.functional as F
 import numpy as np
 
+#vis
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
+
+#std
 from collections import OrderedDict
+import argparse
 
 # our imports 
 from experiments import SingleImageSuperResolution
 from experiments import Denoise
 import supersample_model
+
 
 
 def main(seed: int,
@@ -60,13 +67,27 @@ def main(seed: int,
         Denoise(writer, device, train_gen, val_gen, num_epochs, model_params)
 
 if __name__ == '__main__':
-    seed = 348
-    run_name = 'runs/super_res'
-    dataloader_params = {'batch_size': 2, 'shuffle': True, 'num_workers': 2}
-    train_percentage = 0.9
-    num_epochs = 100
-    dataset_folder= 'processed'
-    experiment_name = "SingleImageSuperResolution"
+    parser = argparse.ArgumentParser(description=("Run experiments for ray-tracing model experiments"))
+    parser.add_argument('--seed',default =348)
+    # seed = 348
+    parser.add_argument('--run_name',default ='runs/super_res',help=("name of this run for visualization purposes"))
+    # run_name = 'runs/super_res'
+    parser.add_argument('--batch_size',default = 2)
+    parser.add_argument('--shuffle',default = True)
+    parser.add_argument('--num_workers',default=2)
+    parser.add_argument('--train_percentage',default = 0.9,help=("percentage of dataset to use in train vs val"))
+    parser.add_argument('--num_epochs',default=100)
+    parser.add_argument('--dataset_folder',default='processed')
+    parser.add_argument('--experiment_name',default='SingleImageSuperResolution',help=("decides which experiment to run"))
+    args = parser.parse_args()
+    seed = int(args.seed)
+    dataloader_params = {'batch_size': int(args.batch_size),
+                         'shuffle': bool(args.shuffle),
+                         'num_workers': int(args.num_workers)}
+    train_percentage = float(args.train_percentage)
+    num_epochs = int(args.num_epochs)
+    dataset_folder= str(args.dataset_folder)
+    experiment_name = str(args.experiment_name)
     main(seed,
         run_name,
         dataset_folder,
