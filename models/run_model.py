@@ -88,6 +88,7 @@ if __name__ == '__main__':
     num_epochs = int(args.num_epochs)
     dataset_folder= str(args.dataset_folder)
     experiment_name = str(args.experiment_name)
+    run_name = str(args.run_name)
     main(seed,
         run_name,
         dataset_folder,
