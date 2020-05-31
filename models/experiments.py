@@ -165,13 +165,13 @@ def Denoise(writer,
         # training
         loss = 0
         for i, batch in enumerate(train_gen):
-            #batch["half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
+            #batch["full","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
             x = []
             for i in model_params['input_types']:
                 x.append(batch[i])
             x = torch.cat(x,dim=1)
 
-            y = batch['full'][:, :, :1060, :].to(device)
+            y = batch['clean'][:, :, :1060, :].to(device)
             x = x.to(device)
             optimizer.zero_grad()
 
