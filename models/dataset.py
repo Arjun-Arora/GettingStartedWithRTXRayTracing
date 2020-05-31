@@ -1,5 +1,6 @@
 import os
 
+import argparse
 import pyexr
 import matplotlib.pyplot as plt
 import numpy as np
@@ -78,9 +79,10 @@ def build_dataset_csv(src_folder: str):
                              "MaterialSpecRough", "WorldNormal", "WorldPosition"]
     src_file_rt_full_1spp = "Full"
     src_file_rt_half_0_5spp = "Half"
+    src_file_rt_full_4spp = "4spp"
 
     data = {'clean': {}, 'full': {}, 'half': {}, 'mat_diffuse': {}, 'mat_ref': {},
-            'mat_spec_rough': {}, "world_normal": {}, "world_pos": {}}
+            'mat_spec_rough': {}, "world_normal": {}, "world_pos": {}, "4spp": {}}
     files = os.listdir(src_folder)
     for file in files:
         file_type = file.split('-')[0]
@@ -102,6 +104,8 @@ def build_dataset_csv(src_folder: str):
             data['world_normal'][idx] = file
         elif file_type == src_file_gbuff_format[4]:
             data['world_pos'][idx] = file
+        elif file_type == src_file_rt_full_4spp:
+            data['4spp'][idx] = file
         else:
             raise NotImplementedError
 
@@ -148,4 +152,9 @@ def convert_exrs_to_tensors(src: str, tgt: str):
             print("Image {i}: Converted {name}.exr to {name}.pt".format(i=i, name=file_name))
 
 
-convert_exrs_to_tensors('data', 'processed')
+parser = argparse.ArgumentParser(description=("Preprocess exrs for model runs."))
+parser.add_argument('--input', default='data')
+parser.add_argument('--output', default='processed')
+args = parser.parse_args()
+
+convert_exrs_to_tensors(args.input_folder, args.output_folder)
