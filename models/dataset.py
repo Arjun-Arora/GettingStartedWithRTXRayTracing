@@ -132,7 +132,7 @@ def exr_to_tensor(exr_filepath: str, half: bool) -> torch.Tensor:
     if half:
         img_array = img_array[:image.height//2, :image.width//2, :]
 
-    return Tensor(np.transpose(img_array, (2, 0, 1)), dtype=torch.float32)
+    return torch.tensor(np.transpose(img_array, (2, 0, 1)), dtype=torch.float32)
 
 
 def convert_exrs_to_tensors(src: str, tgt: str):
@@ -157,4 +157,4 @@ parser.add_argument('--input', default='data')
 parser.add_argument('--output', default='processed')
 args = parser.parse_args()
 
-convert_exrs_to_tensors(args.input_folder, args.output_folder)
+convert_exrs_to_tensors(args.input, args.output)
