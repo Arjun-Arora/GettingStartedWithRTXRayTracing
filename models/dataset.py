@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import struct
 import torch
+import torchvision
 from torch import Tensor
 from torch.utils.data import Dataset
 
@@ -42,7 +43,7 @@ class SupersampleDataset(Dataset):
                 else:
                     image = torch.load(img_path)
 
-                sample[data_type] = image
+                sample[data_type] = image.half()
 
         return sample
 
@@ -77,8 +78,8 @@ class DenoiseDataset(Dataset):
                     image = torch.unsqueeze(torch.load(img_path)[0, :1060, :], 0)
                 else:
                     image = torch.load(img_path)[:, :1060, :]
-                sample[data_type] = image
 
+                sample[data_type] = image.half()
         return sample
 
 

@@ -150,7 +150,7 @@ def Denoise(writer,
              model_params: dict):
 	#grab model
 
-    model = denoise_model.KPCN_light(input_channels=model_params['input_channel_size']).to(device)
+    model = denoise_model.KPCN_light(input_channels=model_params['input_channel_size']).half().to(device)
     apply_kernel = denoise_model.ApplyKernel(21).to(device)
     # model = unet.UNet().to(device)
     loss_criterion = torch.nn.MSELoss().to(device)
