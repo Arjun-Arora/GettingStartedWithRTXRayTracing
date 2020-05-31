@@ -34,6 +34,7 @@ def SingleImageSuperResolution(writer,
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     running_loss = 0
+    running_psnr = 0
     global_step = 0
     best_val_psnr = 0
     print("Running training...")
@@ -62,6 +63,7 @@ def SingleImageSuperResolution(writer,
 
             optimizer.step()
             running_loss += loss.item()
+            running_psnr += get_PSNR(y_hat,y)
 
             global_step = epoch * len(train_gen) + i
 
@@ -69,7 +71,9 @@ def SingleImageSuperResolution(writer,
             if global_step % 10 == 0 and global_step > 0:
                 with torch.no_grad():
                     writer.add_scalar('Training Loss', running_loss/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR', running_psnr/10, global_step=global_step)
                     running_loss = 0
+                    running_psnr = 0
             if global_step % 1000 == 0:
                 with torch.no_grad():
                     x_cpu = x.cpu()
@@ -111,7 +115,7 @@ def SingleImageSuperResolution(writer,
             y_cpu = y.cpu()
 
             writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
-            writer.add_scalar('PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
+            writer.add_scalar('Validation PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
             if running_val_psnr > best_val_psnr:
                 running_val_psnr = best_val_psnr
                 torch.save({
@@ -153,6 +157,7 @@ def Denoise(writer,
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
     running_loss = 0
+    running_psnr = 0
     global_step = 0
     best_val_psnr = 0
     print("Running training on denoiser...")
@@ -177,6 +182,7 @@ def Denoise(writer,
 
             optimizer.step()
             running_loss += loss.item()
+            running_psnr += get_PSNR(y_hat,y)
 
             global_step = epoch * len(train_gen) + i
 
@@ -184,6 +190,8 @@ def Denoise(writer,
             if global_step % 10 == 0 and global_step > 0:
                 with torch.no_grad():
                     writer.add_scalar('Training Loss', running_loss/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR', running_psnr/10, global_step=global_step)
+                    running_psnr = 0
                     running_loss = 0
             if global_step % 1000 == 0:
                 with torch.no_grad():
@@ -231,7 +239,7 @@ def Denoise(writer,
             y_cpu = y.cpu()
 
             writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
-            writer.add_scalar('PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
+            writer.add_scalar('Validation PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
             if running_val_psnr > best_val_psnr:
                 running_val_psnr = best_val_psnr
                 torch.save({
