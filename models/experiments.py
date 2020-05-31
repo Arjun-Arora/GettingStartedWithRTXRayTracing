@@ -71,7 +71,7 @@ def SingleImageSuperResolution(writer,
             if global_step % 10 == 0 and global_step > 0:
                 with torch.no_grad():
                     writer.add_scalar('Training Loss', running_loss/10, global_step=global_step)
-                    writer.add_scalar('Training PSNR', running_psnr/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR (dB)', running_psnr/10, global_step=global_step)
                     running_loss = 0
                     running_psnr = 0
             if global_step % 1000 == 0:
@@ -190,7 +190,7 @@ def Denoise(writer,
             if global_step % 10 == 0 and global_step > 0:
                 with torch.no_grad():
                     writer.add_scalar('Training Loss', running_loss/10, global_step=global_step)
-                    writer.add_scalar('Training PSNR', running_psnr/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR (dB)', running_psnr/10, global_step=global_step)
                     running_psnr = 0
                     running_loss = 0
             if global_step % 1000 == 0:
