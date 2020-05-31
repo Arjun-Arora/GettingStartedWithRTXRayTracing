@@ -69,7 +69,7 @@ class ResBlock(nn.Module):
 
 class KPCN(nn.Module):
     def __init__(self, input_channels, kernel_size=21):
-        super(KPCN18, self).__init__()
+        super(KPCN, self).__init__()
         # source encoder
         self.conv1 = conv3x3(input_channels, 100)
         self.relu1 = nn.ReLU(inplace=True)
