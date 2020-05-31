@@ -81,10 +81,12 @@ protected:
 	uint32_t                      mAccumCount = 0;
 	// gather data for every mGatherRate frames
 	uint32_t                      mGatherRate = 4;
-	uint32_t                      mTargetGroundTruthSpp = 64;
+	uint32_t                      mTargetGroundTruthSpp = 32;
+	uint32_t                      mCompareGroundTruthSpp = 4;
+	std::string					  mDataPath = "./train/";
 	// Data Gathering Counters
 	uint32_t                      mDataCount = 0;
-	uint32_t                      mMaxDataNum = 5;
+	uint32_t                      mMaxDataNum = 1000;
 	uint32_t                      mFrameCount = 0;
 private:
 	RenderingPipeline*  mpRenderingPipeline;
