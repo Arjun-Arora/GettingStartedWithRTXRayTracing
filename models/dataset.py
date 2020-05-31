@@ -1,4 +1,5 @@
 import os
+import random
 
 import argparse
 import pyexr
@@ -12,8 +13,17 @@ from torch import Tensor
 from torch.utils.data import Dataset
 
 
+def random_crop_tensor(input, crop_size):
+    assert(len(input.shape) == 3)
+    random.seed()
+    _, h, w = input.shape
+    crop_h = max(0, h - crop_size)
+    crop_w = max(0, w - crop_size)
+    random_anchor = [int(random.random() * crop_h), int(random.random() * crop_w)]
+    return input[:, random_anchor[0] : min(random_anchor[0] + crop_size, h), random_anchor[1] : min(random_anchor[1] + crop_size, w)]
+
 class SupersampleDataset(Dataset):
-    def __init__(self, src_folder: str, input_types: list):
+    def __init__(self, src_folder: str, input_types: list, crop_size=256):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -22,6 +32,7 @@ class SupersampleDataset(Dataset):
         self.fh_frame = pd.read_csv(csv_path)
 
         self.data_types_to_fetch = input_types
+        self.crop_size = crop_size
 
     def __len__(self):
         return len(self.fh_frame)
@@ -43,13 +54,14 @@ class SupersampleDataset(Dataset):
                 else:
                     image = torch.load(img_path)
 
+                image = random_crop_tensor(image, self.crop_size)
                 sample[data_type] = image.half()
 
         return sample
 
 
 class DenoiseDataset(Dataset):
-    def __init__(self, src_folder: str):
+    def __init__(self, src_folder: str, crop_size=256):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -58,6 +70,7 @@ class DenoiseDataset(Dataset):
         self.fh_frame = pd.read_csv(csv_path)
 
         self.data_types_to_fetch = ["full", "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos", "clean"]
+        self.crop_size = crop_size
 
     def __len__(self):
         return len(self.fh_frame)
@@ -78,7 +91,7 @@ class DenoiseDataset(Dataset):
                     image = torch.unsqueeze(torch.load(img_path)[0, :1060, :], 0)
                 else:
                     image = torch.load(img_path)[:, :1060, :]
-
+                image = random_crop_tensor(image, self.crop_size)
                 sample[data_type] = image.half()
         return sample
 
