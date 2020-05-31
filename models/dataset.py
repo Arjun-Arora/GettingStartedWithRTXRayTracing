@@ -152,9 +152,10 @@ def convert_exrs_to_tensors(src: str, tgt: str):
             print("Image {i}: Converted {name}.exr to {name}.pt".format(i=i, name=file_name))
 
 
-parser = argparse.ArgumentParser(description=("Preprocess exrs for model runs."))
-parser.add_argument('--input', default='data')
-parser.add_argument('--output', default='processed')
-args = parser.parse_args()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=("Preprocess exrs for model runs."))
+    parser.add_argument('--input', default='data')
+    parser.add_argument('--output', default='processed')
+    args = parser.parse_args()
 
-convert_exrs_to_tensors(args.input, args.output)
+    convert_exrs_to_tensors(args.input, args.output)
