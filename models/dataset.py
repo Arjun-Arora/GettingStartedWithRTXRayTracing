@@ -35,10 +35,10 @@ class SupersampleDataset(Dataset):
             data_type = self.fh_frame.columns[i]
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
-                if data_type == "full" or "half" or "clean" or "mat_diffuse":
+                if data_type in ["full", "clean", "mat_diffuse"]:
                     image = torch.clamp(torch.load(img_path), 0, 1)
-                elif data_type == "mat_ref" or "mat_spec_rough":
-                    image = torch.load(img_path)[0, :, :]
+                elif data_type in ["mat_ref", "mat_spec_rough"]:
+                    image = torch.unsqueeze(torch.load(img_path)[0, :, :], 0)
                 else:
                     image = torch.load(img_path)
 
@@ -71,12 +71,12 @@ class DenoiseDataset(Dataset):
             data_type = self.fh_frame.columns[i]
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
-                if data_type == "full" or "clean" or "mat_diffuse":
-                    image = torch.clamp(torch.load(img_path), 0, 1)
-                elif data_type == "mat_ref" or "mat_spec_rough":
-                    image = torch.load(img_path)[0, :, :]
+                if data_type in ["full", "clean", "mat_diffuse"]:
+                    image = torch.clamp(torch.load(img_path)[:, :1060, :], 0, 1)
+                elif data_type in ["mat_ref", "mat_spec_rough"]:
+                    image = torch.unsqueeze(torch.load(img_path)[0, :1060, :], 0)
                 else:
-                    image = torch.load(img_path)
+                    image = torch.load(img_path)[:, :1060, :]
                 sample[data_type] = image
 
         return sample
