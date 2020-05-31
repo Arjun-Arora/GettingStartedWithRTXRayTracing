@@ -11,6 +11,12 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
 from collections import OrderedDict
+def get_PSNR(model_output, target):
+    I_hat = model_output.cpu().detach().numpy()
+    I = target.cpu().detach().numpy()
+    mse = (np.square(I - I_hat)).mean(axis=None)
+    PSNR = 10 * np.log10(1.0 / mse)
+    return PSNR
 
 def SingleImageSuperResolution(writer,
 							 device,
@@ -29,6 +35,7 @@ def SingleImageSuperResolution(writer,
 
     running_loss = 0
     global_step = 0
+    best_val_psnr = 0
     print("Running training...")
     for epoch in range(num_epochs):
         # training
@@ -85,15 +92,11 @@ def SingleImageSuperResolution(writer,
                     img_grid = viz.tensor_preprocess(img_grid, difference=True)
                     writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
 
-        torch.save({
-            'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': loss.item()},
-            "model_checkpoints/super_res/exp_smooth_l1_loss_{epoch}.pt".format(epoch=epoch))
+        
 
         with torch.set_grad_enabled(False):
             running_val_loss = 0
+            running_val_psnr = 0
             x, y, y_hat = None, None, None
             for j, batch in enumerate(val_gen):
                 x, y = batch['half'].to(device), batch['full'][:, :, :1060, :].to(device)
@@ -101,13 +104,22 @@ def SingleImageSuperResolution(writer,
                 y_hat = model(x)
 
                 running_val_loss += loss_criterion(y_hat, y).item()
+                running_val_psnr += get_PSNR(y_hat, y)
 
             x_cpu = x.cpu()
             y_hat_cpu = y_hat.cpu()
             y_cpu = y.cpu()
 
             writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
-            running_val_loss = 0
+            writer.add_scalar('PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
+            if running_val_psnr > best_val_psnr:
+                running_val_psnr = best_val_psnr
+                torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss.item()},
+                "model_checkpoints/super_res/exp_smooth_l1_loss_{epoch}.pt".format(epoch=epoch))
 
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
@@ -142,6 +154,7 @@ def Denoise(writer,
 
     running_loss = 0
     global_step = 0
+    best_val_psnr = 0
     print("Running training on denoiser...")
     for epoch in range(num_epochs):
         # training
@@ -155,7 +168,6 @@ def Denoise(writer,
 
             y = batch['full'][:, :, :1060, :].to(device)
             x = x.to(device)
-
             optimizer.zero_grad()
 
             kernel = model(x)
@@ -195,15 +207,16 @@ def Denoise(writer,
                     img_grid = viz.tensor_preprocess(img_grid, difference=True)
                     writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
 
-        torch.save({
-            'epoch': epoch,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': loss.item()},
-            "model_checkpoints/denoise/exp_MSE_loss_{epoch}.pt".format(epoch=epoch))
+        # torch.save({
+        #     'epoch': epoch,
+        #     'model_state_dict': model.state_dict(),
+        #     'optimizer_state_dict': optimizer.state_dict(),
+        #     'loss': loss.item()},
+        #     "model_checkpoints/denoise/exp_MSE_loss_{epoch}.pt".format(epoch=epoch))
 
         with torch.set_grad_enabled(False):
             running_val_loss = 0
+            running_val_psnr = 0
             x, y, y_hat = None, None, None
             for j, batch in enumerate(val_gen):
                 x, y = batch['half'].to(device), batch['full'][:, :, :1060, :].to(device)
@@ -211,13 +224,22 @@ def Denoise(writer,
                 y_hat = model(x)
 
                 running_val_loss += loss_criterion(y_hat, y).item()
+                running_val_psnr += get_PSNR(y_hat,y)
 
             x_cpu = x.cpu()
             y_hat_cpu = y_hat.cpu()
             y_cpu = y.cpu()
 
             writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
-            running_val_loss = 0
+            writer.add_scalar('PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
+            if running_val_psnr > best_val_psnr:
+                running_val_psnr = best_val_psnr
+                torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss.item()},
+                "model_checkpoints/denoise/exp_MSE_loss_{epoch}.pt".format(epoch=epoch))
 
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
