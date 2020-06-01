@@ -12,6 +12,8 @@ import torchvision
 from torch import Tensor
 from torch.utils.data import Dataset
 
+# small epsilon to avoid nan
+SMALL_EPSILON = 1e-6
 
 def random_crop_tensor(input, crop_size):
     assert(len(input.shape) == 3)
@@ -23,7 +25,7 @@ def random_crop_tensor(input, crop_size):
     return input[:, random_anchor[0] : min(random_anchor[0] + crop_size, h), random_anchor[1] : min(random_anchor[1] + crop_size, w)]
 
 class SupersampleDataset(Dataset):
-    def __init__(self, src_folder: str, input_types: list, crop_size=256):
+    def __init__(self, src_folder: str, input_types: list, crop_size=256, log_trans=true):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -33,6 +35,7 @@ class SupersampleDataset(Dataset):
 
         self.data_types_to_fetch = input_types
         self.crop_size = crop_size
+        self.log_trans = log_trans
 
     def __len__(self):
         return len(self.fh_frame)
@@ -47,8 +50,11 @@ class SupersampleDataset(Dataset):
             data_type = self.fh_frame.columns[i]
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
-                if data_type in ["full", "clean", "mat_diffuse"]:
-                    image = torch.clamp(torch.load(img_path), 0, 1)
+                if data_type in ["half", "full", "clean", "mat_diffuse"]:
+                    if self.log_trans:
+                        image = torch.log(torch.load(img_path)[:, :1060, :])
+                    else:
+                        image = torch.clamp(torch.load(img_path)[:, :1060, :], 0, 1)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
                     image = torch.unsqueeze(torch.load(img_path)[0, :, :], 0)
                 else:
@@ -61,7 +67,7 @@ class SupersampleDataset(Dataset):
 
 
 class DenoiseDataset(Dataset):
-    def __init__(self, src_folder: str, crop_size=256):
+    def __init__(self, src_folder: str, crop_size=256, log_trans=true):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -71,6 +77,7 @@ class DenoiseDataset(Dataset):
 
         self.data_types_to_fetch = ["full", "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos", "clean"]
         self.crop_size = crop_size
+        self.log_trans = log_trans
 
     def __len__(self):
         return len(self.fh_frame)
@@ -86,7 +93,10 @@ class DenoiseDataset(Dataset):
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
                 if data_type in ["full", "clean", "mat_diffuse"]:
-                    image = torch.clamp(torch.load(img_path)[:, :1060, :], 0, 1)
+                    if self.log_trans:
+                        image = torch.log(torch.load(img_path)[:, :1060, :])
+                    else:
+                        image = torch.clamp(torch.load(img_path)[:, :1060, :], 0, 1)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
                     image = torch.unsqueeze(torch.load(img_path)[0, :1060, :], 0)
                 else:
