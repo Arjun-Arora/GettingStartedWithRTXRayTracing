@@ -122,7 +122,7 @@ class KPCN_light(nn.Module):
     def make_extractor(self, input_channels, output_channels):
         resblock_list = []
         # maybe use append then * 23?
-        [resblock_list.append(ResBlock(input_channels, input_channels)) for i in range(7)]
+        [resblock_list.append(ResBlock(input_channels, input_channels)) for i in range(3)]
         resblock_list.append(ResBlock(input_channels, output_channels))
         return resblock_list
 
