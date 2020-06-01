@@ -1,5 +1,6 @@
 import torch
 from supersample_model import ESPCN
+from denoise_model import KPCN_light
 from tqdm import tqdm
 input_tensor_shape= (1,14, 1060, 1920)
 output_tensor_shape = (1,3,1060,1920)
@@ -9,6 +10,7 @@ y = torch.randn(*output_tensor_shape).cuda().half()
 
 #model = torch.nn.Linear(D_in, D_out).cuda().half()
 model = ESPCN(1,14,3).cuda().half()
+#model = KPCN_light(14).cuda().half()
 opt = torch.optim.SGD(model.parameters(), lr=1e-3)
 
 for t in tqdm(range(100)):
