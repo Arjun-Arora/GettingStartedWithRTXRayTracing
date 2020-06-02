@@ -11,6 +11,7 @@ import torch
 import torchvision
 from torch import Tensor
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 # small epsilon to avoid nan
 SMALL_EPSILON = 1e-6
@@ -25,7 +26,7 @@ def random_crop_tensor(input, crop_size):
     return input[:, random_anchor[0] : min(random_anchor[0] + crop_size, h), random_anchor[1] : min(random_anchor[1] + crop_size, w)]
 
 class SupersampleDataset(Dataset):
-    def __init__(self, src_folder: str, input_types: list, crop_size=256, log_trans=true):
+    def __init__(self, src_folder: str, input_types: list, crop_size=256, log_trans=True):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -60,14 +61,14 @@ class SupersampleDataset(Dataset):
                 else:
                     image = torch.load(img_path)
 
-                image = random_crop_tensor(image, self.crop_size)
+                # image = random_crop_tensor(image, self.crop_size)
                 sample[data_type] = image.half()
 
         return sample
 
 
 class DenoiseDataset(Dataset):
-    def __init__(self, src_folder: str, crop_size=256, log_trans=true):
+    def __init__(self, src_folder: str, crop_size=256, log_trans=True):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -185,10 +186,39 @@ def convert_exrs_to_tensors(src: str, tgt: str):
             print("Image {i}: Converted {name}.exr to {name}.pt".format(i=i, name=file_name))
 
 
+def fetch_min_max_of_datatype(src: str, data_type: str):
+    df = pd.read_csv(os.path.join(src, 'data.csv'))
+
+    dataset_min = None
+    dataset_max = None
+    for idx, row in tqdm(df.iterrows()):
+        data_tensor = torch.load(os.path.join(src, row[data_type]))
+        curr_min = np.min(data_tensor.numpy(), axis=(1, 2))
+        curr_max = np.max(data_tensor.numpy(), axis=(1, 2))
+
+        if dataset_min is None:
+            dataset_min = curr_min
+        else:
+            to_swap = dataset_min > curr_min
+            dataset_min[to_swap] = curr_min[to_swap]
+
+        if dataset_max is None:
+            dataset_max = curr_max
+        else:
+            to_swap = dataset_max < curr_max
+            dataset_max[to_swap] = curr_max[to_swap]
+    np.save(os.path.join(src, '{}_min_max.npy'.format(data_type)), np.vstack((dataset_min, dataset_max)))
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=("Preprocess exrs for model runs."))
     parser.add_argument('--input', default='data')
     parser.add_argument('--output', default='processed')
+    parser.add_argument('--compute_min_max', action='store_true')
     args = parser.parse_args()
 
-    convert_exrs_to_tensors(args.input, args.output)
+    if args.compute_min_max:
+        for dt in ['half', 'full', 'clean']:
+            fetch_min_max_of_datatype('processed', dt)
+            print(np.load(os.path.join('processed', '{}_min_max.npy'.format(dt))))
+    else:
+        convert_exrs_to_tensors(args.input, args.output)
