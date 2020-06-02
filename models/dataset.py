@@ -31,7 +31,7 @@ def random_crop_tensor(input, crop_size):
 class SupersampleDataset(Dataset):
     def __init__(self, src_folder: str, input_types: list, crop_size=256):
         csv_path = os.path.join(src_folder, "data.csv")
-        if not os.path.exists(os.path.join(src_folder, "data.csv")):
+        if not os.path.exists(os.path.join(self.src_folder, "data.csv")):
             build_dataset_csv(src_folder)
 
         self.src_folder = src_folder
