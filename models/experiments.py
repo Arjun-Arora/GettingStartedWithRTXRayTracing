@@ -90,19 +90,19 @@ def SingleImageSuperResolution(writer,
 
                     img_grid = torchvision.utils.make_grid(x_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
-                    writer.add_image('Training Input', img_grid, global_step=global_step)
+                    writer.add_image('Training Input', img_grid * 255, global_step=global_step)
 
                     img_grid = torchvision.utils.make_grid(y_hat_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
-                    writer.add_image('Model Output', img_grid, global_step=global_step)
+                    writer.add_image('Model Output', img_grid * 255, global_step=global_step)
 
                     img_grid = torchvision.utils.make_grid(y_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
-                    writer.add_image('Ground Truth', img_grid, global_step=global_step)
+                    writer.add_image('Ground Truth', img_grid * 255, global_step=global_step)
 
                     img_grid = torchvision.utils.make_grid(y_cpu - y_hat_cpu)
                     img_grid = viz.tensor_preprocess(img_grid, difference=True)
-                    writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+                    writer.add_image('Difference (GT and Model Output)', img_grid * 255, global_step=global_step, dataformats='HW')
 
         
 
@@ -138,19 +138,19 @@ def SingleImageSuperResolution(writer,
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
             
-            writer.add_image('Val Input', img_grid, global_step=global_step)
+            writer.add_image('Val Input', img_grid * 255, global_step=global_step)
 
             img_grid = torchvision.utils.make_grid(y_hat_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
-            writer.add_image('Val Model Output', img_grid, global_step=global_step)
+            writer.add_image('Val Model Output', img_grid * 255, global_step=global_step)
 
             img_grid = torchvision.utils.make_grid(y_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
-            writer.add_image('Val Ground Truth', img_grid, global_step=global_step)
+            writer.add_image('Val Ground Truth', img_grid * 255, global_step=global_step)
 
             img_grid = torchvision.utils.make_grid(y_cpu - y_hat_cpu)
             img_grid = viz.tensor_preprocess(img_grid, difference=True)
-            writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+            writer.add_image('Val Difference (GT and Model Output)', img_grid * 255, global_step=global_step, dataformats='HW')
 
 
 def Denoise(writer,
@@ -214,19 +214,19 @@ def Denoise(writer,
 
                     img_grid = torchvision.utils.make_grid(x_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
-                    writer.add_image('Training Input', img_grid, global_step=global_step)
+                    writer.add_image('Training Input', img_grid * 255, global_step=global_step)
 
                     img_grid = torchvision.utils.make_grid(y_hat_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
-                    writer.add_image('Model Output', img_grid, global_step=global_step)
+                    writer.add_image('Model Output', img_grid * 255, global_step=global_step)
 
                     img_grid = torchvision.utils.make_grid(y_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
-                    writer.add_image('Ground Truth', img_grid, global_step=global_step)
+                    writer.add_image('Ground Truth', img_grid * 255, global_step=global_step)
 
                     img_grid = torchvision.utils.make_grid(y_cpu - y_hat_cpu)
                     img_grid = viz.tensor_preprocess(img_grid, difference=True)
-                    writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+                    writer.add_image('Difference (GT and Model Output)', img_grid * 255, global_step=global_step, dataformats='HW')
 
         # torch.save({
         #     'epoch': epoch,
@@ -266,17 +266,17 @@ def Denoise(writer,
 
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
-            writer.add_image('Val Input', img_grid, global_step=global_step)
+            writer.add_image('Val Input', img_grid * 255, global_step=global_step)
 
             img_grid = torchvision.utils.make_grid(y_hat_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
-            writer.add_image('Val Model Output', img_grid, global_step=global_step)
+            writer.add_image('Val Model Output', img_grid * 255, global_step=global_step)
 
             img_grid = torchvision.utils.make_grid(y_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
-            writer.add_image('Val Ground Truth', img_grid, global_step=global_step)
+            writer.add_image('Val Ground Truth', img_grid * 255, global_step=global_step)
 
             img_grid = torchvision.utils.make_grid(y_cpu - y_hat_cpu)
             img_grid = viz.tensor_preprocess(img_grid, difference=True)
-            writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+            writer.add_image('Val Difference (GT and Model Output)', img_grid * 255, global_step=global_step, dataformats='HW')
 
