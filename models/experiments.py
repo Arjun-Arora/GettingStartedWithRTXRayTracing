@@ -127,6 +127,7 @@ def SingleImageSuperResolution(writer,
 
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
+            
             writer.add_image('Val Input', img_grid, global_step=global_step)
 
             img_grid = torchvision.utils.make_grid(y_hat_cpu)

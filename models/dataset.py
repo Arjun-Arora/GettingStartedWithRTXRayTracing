@@ -29,7 +29,7 @@ def random_crop_tensor(input, crop_size):
     return input[:, random_anchor[0] : min(random_anchor[0] + crop_size, h), random_anchor[1] : min(random_anchor[1] + crop_size, w)]
 
 class SupersampleDataset(Dataset):
-    def __init__(self, src_folder: str, input_types: list, crop_size=256, gamma_trans=True):
+    def __init__(self, src_folder: str, input_types: list, crop_size=256):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -39,7 +39,6 @@ class SupersampleDataset(Dataset):
 
         self.data_types_to_fetch = input_types
         self.crop_size = crop_size
-        self.gamma_trans = gamma_trans
 
     def __len__(self):
         return len(self.fh_frame)
@@ -55,17 +54,21 @@ class SupersampleDataset(Dataset):
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
                 if data_type in ["half", "full", "clean"]:
-                    if self.gamma_trans:
-                        image = torch.pow(torch.load(img_path)[:, :1060, :], INV_GAMMA)
-                    else:
-                        image = torch.clamp(torch.load(img_path)[:, :1060, :], 0, 1)
+                    min_max_arr = np.load(os.path.join('processed', '{}_min_max.npy'.format(dt)))
+                    img_np = torch.load(img_path)[:, :1016, :].numpy()
+
+                    img_np = img_np - min_max_arr[0]
+                    img_np = img_np / (min_max_arr[1] - min_max_arr[0])
+
+                    img_tensor = torch.tensor(img_np)
+                    image = torch.pow(img_tensor, INV_GAMMA)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
                     image = torch.unsqueeze(torch.load(img_path)[0, :, :], 0)
                 else:
                     image = torch.load(img_path)
 
                 # image = random_crop_tensor(image, self.crop_size)
-                sample[data_type] = image.half()
+                sample[data_type] = image
 
         return sample
 
@@ -106,13 +109,13 @@ class DenoiseDataset(Dataset):
                 img_path = os.path.join(self.src_folder, fh)
                 if data_type in ["full", "clean"]:
                     if self.gamma_trans:
-                        image = torch.pow(torch.load(img_path)[:, :1060, :], INV_GAMMA)
+                        image = torch.pow(torch.load(img_path)[:, :1016, :], INV_GAMMA)
                     else:
-                        image = torch.clamp(torch.load(img_path)[:, :1060, :], 0, 1)
+                        image = torch.clamp(torch.load(img_path)[:, :1016, :], 0, 1)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
-                    image = torch.unsqueeze(torch.load(img_path)[0, :1060, :], 0)
+                    image = torch.unsqueeze(torch.load(img_path)[0, :1016, :], 0)
                 else:
-                    image = torch.load(img_path)[:, :1060, :]
+                    image = torch.load(img_path)[:, :1016, :]
                 image = random_crop_tensor(image, self.crop_size)
                 sample[data_type] = image.half()
         return sample
@@ -229,7 +232,7 @@ if __name__ == "__main__":
 
     if args.compute_min_max:
         for dt in ['half', 'full', 'clean']:
-            fetch_min_max_of_datatype('processed', dt)
-            print(np.load(os.path.join('processed', '{}_min_max.npy'.format(dt))))
+            fetch_min_max_of_datatype(args.input, dt)
+            print(np.load(os.path.join(args.input, '{}_min_max.npy'.format(dt))))
     else:
         convert_exrs_to_tensors(args.input, args.output)
