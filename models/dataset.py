@@ -31,7 +31,7 @@ def random_crop_tensor(input, crop_size):
 class SupersampleDataset(Dataset):
     def __init__(self, src_folder: str, input_types: list, crop_size=256):
         csv_path = os.path.join(src_folder, "data.csv")
-        if not os.path.exists(os.path.join(self.src_folder, "data.csv")):
+        if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
 
         self.src_folder = src_folder
@@ -54,7 +54,7 @@ class SupersampleDataset(Dataset):
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
                 if data_type in ["half", "full", "clean"]:
-                    min_max_arr = np.load(os.path.join(src_folder, '{}_min_max.npy'.format(data_type)))
+                    min_max_arr = np.load(os.path.join(self.src_folder, '{}_min_max.npy'.format(data_type)))
                     img_np = torch.load(img_path)[:, :1016, :].numpy()
 
                     img_np = img_np - min_max_arr[0]
