@@ -34,6 +34,7 @@ def SingleImageSuperResolution(writer,
     # model = unet.UNet().to(device)
     loss_criterion = torch.nn.SmoothL1Loss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
 
     running_loss = 0
     running_psnr = 0
@@ -119,6 +120,8 @@ def SingleImageSuperResolution(writer,
             y_hat_cpu = y_hat.cpu()
             y_cpu = y.cpu()
 
+            scheduler.step(running_val_loss / len(val_gen))
+
             writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
             writer.add_scalar('Validation PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
             if running_val_psnr > best_val_psnr:
@@ -161,6 +164,7 @@ def Denoise(writer,
     # model = unet.UNet().to(device)
     loss_criterion = torch.nn.MSELoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
 
     running_loss = 0
     running_psnr = 0
@@ -243,6 +247,8 @@ def Denoise(writer,
             x_cpu = x.cpu()
             y_hat_cpu = y_hat.cpu()
             y_cpu = y.cpu()
+
+            scheduler.step(running_val_loss / len(val_gen))
 
             writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
             writer.add_scalar('Validation PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
