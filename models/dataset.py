@@ -62,9 +62,6 @@ class SupersampleDataset(Dataset):
 
                     # img_tensor = torch.tensor(np.transpose(img_np, axes=(2, 1, 0)))
                     img_tensor = torch.load(img_path)[:, :1016, :]
-                    
-                    image = torch.pow(img_tensor, INV_GAMMA)
-                    image = torch.clamp(image, 0, 1)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
                     image = torch.unsqueeze(torch.load(img_path)[0, :, :], 0)
                 else:

@@ -8,6 +8,8 @@ import torch.nn.functional as F
 import numpy as np
 import os
 
+from dataset import INV_GAMMA
+
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
@@ -88,6 +90,15 @@ def SingleImageSuperResolution(writer,
                     y_hat_cpu = y_hat.cpu()
                     y_cpu = y.cpu()
 
+                    x_cpu = torch.pow(x_cpu, INV_GAMMA)
+                    x_cpu = torch.clamp(x_cpu, 0, 1)
+
+                    y_hat_cpu = torch.pow(y_hat_cpu, INV_GAMMA)
+                    y_hat_cpu = torch.clamp(y_hat_cpu, 0, 1)
+
+                    y_cpu = torch.pow(y_cpu, INV_GAMMA)
+                    y_cpu = torch.clamp(y_cpu, 0, 1)
+
                     img_grid = torchvision.utils.make_grid(x_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
                     writer.add_image('Training Input', img_grid, global_step=global_step)
@@ -121,6 +132,15 @@ def SingleImageSuperResolution(writer,
             x_cpu = x.cpu()
             y_hat_cpu = y_hat.cpu()
             y_cpu = y.cpu()
+
+            x_cpu = torch.pow(x_cpu, INV_GAMMA)
+            x_cpu = torch.clamp(x_cpu, 0, 1)
+
+            y_hat_cpu = torch.pow(y_hat_cpu, INV_GAMMA)
+            y_hat_cpu = torch.clamp(y_hat_cpu, 0, 1)
+
+            y_cpu = torch.pow(y_cpu, INV_GAMMA)
+            y_cpu = torch.clamp(y_cpu, 0, 1)
 
             scheduler.step(running_val_loss / len(val_gen))
 
