@@ -57,10 +57,10 @@ class SupersampleDataset(Dataset):
                     min_max_arr = np.load(os.path.join(self.src_folder, '{}_min_max.npy'.format(data_type)))
                     img_np = torch.load(img_path)[:, :1016, :].numpy()
 
-                    img_np = img_np - min_max_arr[0]
+                    img_np = np.transpose(img_np, axis=(2, 1, 0)) - min_max_arr[0]
                     img_np = img_np / (min_max_arr[1] - min_max_arr[0])
 
-                    img_tensor = torch.tensor(img_np)
+                    img_tensor = torch.tensor(np.transpose(img_np, axis=(2, 1, 0)))
                     image = torch.pow(img_tensor, INV_GAMMA)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
                     image = torch.unsqueeze(torch.load(img_path)[0, :, :], 0)
