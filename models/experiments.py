@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
 from collections import OrderedDict
+from tqdm import tqdm
+
 def get_PSNR(model_output, target):
     I_hat = model_output.cpu().detach().numpy()
     I = target.cpu().detach().numpy()
@@ -38,7 +40,7 @@ def SingleImageSuperResolution(writer,
     global_step = 0
     best_val_psnr = 0
     print("Running training...")
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
         # training
         loss = 0
         for i, batch in enumerate(train_gen):
@@ -52,18 +54,21 @@ def SingleImageSuperResolution(writer,
                 x = torch.cat(x,dim=1)
             else:
                 x = batch[model_params['input_types'][0]]
-            y = batch['full'][:, :, :1060, :].to(device)
+            y = batch['full'][:, :, :1016, :].to(device)
             x = x.to(device)
 
             optimizer.zero_grad()
 
             y_hat = model(x)
+            #print(y_hat.size())
+            #print(y.size())
             loss = loss_criterion(y_hat, y)
             loss.backward()
-
+            #print("loss:", loss.item())
             optimizer.step()
             running_loss += loss.item()
-            running_psnr += get_PSNR(y_hat,y)
+            with torch.no_grad():
+                running_psnr += get_PSNR(y_hat, y)
 
             global_step = epoch * len(train_gen) + i
 
@@ -103,7 +108,7 @@ def SingleImageSuperResolution(writer,
             running_val_psnr = 0
             x, y, y_hat = None, None, None
             for j, batch in enumerate(val_gen):
-                x, y = batch['half'].to(device), batch['full'][:, :, :1060, :].to(device)
+                x, y = batch['half'].to(device), batch['full'][:, :, :1016, :].to(device)
 
                 y_hat = model(x)
 
