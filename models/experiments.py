@@ -6,6 +6,7 @@ import denoise_model
 import viz
 import torch.nn.functional as F
 import numpy as np
+import os
 
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, random_split
@@ -25,6 +26,7 @@ def SingleImageSuperResolution(writer,
 							 train_gen,
 							 val_gen,
 							 num_epochs,
+                             chkpoint_folder,
                              model_params: dict):
 	#grab model
 
@@ -131,7 +133,7 @@ def SingleImageSuperResolution(writer,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': loss.item()},
-                "model_checkpoints/super_res/exp_smooth_l1_loss_{epoch}.pt".format(epoch=epoch))
+                os.path.join(chkpoint_folder, "exp_smooth_l1_loss_{epoch}.pt".format(epoch=epoch)))
 
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
@@ -156,6 +158,7 @@ def Denoise(writer,
 			 train_gen,
 			 val_gen,
 			 num_epochs,
+             chkpoint_folder,
              model_params: dict):
 	#grab model
 
@@ -259,7 +262,7 @@ def Denoise(writer,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': loss.item()},
-                "model_checkpoints/denoise/exp_MSE_loss_{epoch}.pt".format(epoch=epoch))
+                os.path.join(chkpoint_folder, "exp_smooth_l1_loss_{epoch}.pt".format(epoch=epoch)))
 
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
