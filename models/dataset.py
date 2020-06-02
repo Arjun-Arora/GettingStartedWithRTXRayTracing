@@ -54,7 +54,7 @@ class SupersampleDataset(Dataset):
             if data_type in self.data_types_to_fetch:
                 img_path = os.path.join(self.src_folder, fh)
                 if data_type in ["half", "full", "clean"]:
-                    min_max_arr = np.load(os.path.join('processed', '{}_min_max.npy'.format(data_type)))
+                    min_max_arr = np.load(os.path.join(src_folder, '{}_min_max.npy'.format(data_type)))
                     img_np = torch.load(img_path)[:, :1016, :].numpy()
 
                     img_np = img_np - min_max_arr[0]
