@@ -50,16 +50,16 @@ def SingleImageSuperResolution(writer,
         loss = 0
         for i, batch in enumerate(train_gen):
             #batch["half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
+            y = batch['full'][:, :, :1016, :].to(device)
             if len(model_params['input_types']) > 1:
                 x = []
-                for i in model_params['input_types']:
-                    if i == 'half':
-                        x.append(F.interpolate(batch[i],scale_factor=2).to(device))
-                    x.append(batch[i].to(device))
+                for p in model_params['input_types']:
+                    if p == 'half':
+                        x.append(F.interpolate(batch[p], scale_factor=2).to(device))
+                    x.append(batch[p].to(device))
                 x = torch.cat(x,dim=1)
             else:
                 x = batch[model_params['input_types'][0]]
-            y = batch['full'][:, :, :1016, :].to(device)
             x = x.to(device)
 
             optimizer.zero_grad()
@@ -86,9 +86,9 @@ def SingleImageSuperResolution(writer,
                     running_psnr = 0
             if global_step % 1000 == 0:
                 with torch.no_grad():
-                    x_cpu = x.cpu()
-                    y_hat_cpu = y_hat.cpu()
-                    y_cpu = y.cpu()
+                    x_cpu = x.cpu()[:, :3, :, :]
+                    y_hat_cpu = y_hat.cpu()[:, :3, :, :]
+                    y_cpu = y.cpu()[:, :3, :, :]
 
                     # x_cpu = torch.pow(x_cpu, INV_GAMMA)
                     # x_cpu = torch.clamp(x_cpu, 0, 1)
@@ -122,16 +122,27 @@ def SingleImageSuperResolution(writer,
             running_val_psnr = 0
             x, y, y_hat = None, None, None
             for j, batch in enumerate(val_gen):
-                x, y = batch['half'].to(device), batch['full'][:, :, :1016, :].to(device)
+                y = batch['full'][:, :, :1016, :].to(device)
+                if len(model_params['input_types']) > 1:
+                    x = []
+                    for p in model_params['input_types']:
+                        if p == 'half':
+                            x.append(F.interpolate(batch[p], scale_factor=2).to(device))
+                        x.append(batch[p].to(device))
+                    x = torch.cat(x,dim=1)
+                else:
+                    x = batch[model_params['input_types'][0]]
+                
+                x = x.to(device)
 
                 y_hat = model(x)
 
                 running_val_loss += loss_criterion(y_hat, y).item()
                 running_val_psnr += get_PSNR(y_hat, y)
 
-            x_cpu = x.cpu()
-            y_hat_cpu = y_hat.cpu()
-            y_cpu = y.cpu()
+            x_cpu = x.cpu()[:, :3, :, :]
+            y_hat_cpu = y_hat.cpu()[:, :3, :, :]
+            y_cpu = y.cpu()[:, :3, :, :]
 
             # x_cpu = torch.pow(x_cpu, INV_GAMMA)
             # x_cpu = torch.clamp(x_cpu, 0, 1)

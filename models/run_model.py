@@ -42,10 +42,12 @@ def main(seed: int,
     
     #grabbing dataset from dataset folder
     if experiment_name == 'SingleImageSuperResolution':
-        input_types = ['full', 'half']
-        data = dataset.SupersampleDataset(dataset_folder, input_types)
-
-    if experiment_name == 'Denoise':
+        types_to_load = ['full', 'half']
+        data = dataset.SupersampleDataset(dataset_folder, types_to_load)
+    elif experiment_name == 'GbufferOnlySuperResolution':
+        types_to_load = ['mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full']
+        data = dataset.SupersampleDataset(dataset_folder, types_to_load)
+    elif experiment_name == 'Denoise':
         data = dataset.DenoiseDataset(dataset_folder)
 
     #calculating train-val split

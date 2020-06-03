@@ -29,7 +29,7 @@ def random_crop_tensor(input, crop_size):
     return input[:, random_anchor[0] : min(random_anchor[0] + crop_size, h), random_anchor[1] : min(random_anchor[1] + crop_size, w)]
 
 class SupersampleDataset(Dataset):
-    def __init__(self, src_folder: str, input_types: list, crop_size=256):
+    def __init__(self, src_folder: str, data_types_to_fetch: list, crop_size=256):
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
@@ -37,7 +37,7 @@ class SupersampleDataset(Dataset):
         self.src_folder = src_folder
         self.fh_frame = pd.read_csv(csv_path)
 
-        self.data_types_to_fetch = input_types
+        self.data_types_to_fetch = data_types_to_fetch
         self.crop_size = crop_size
 
     def __len__(self):
@@ -48,7 +48,8 @@ class SupersampleDataset(Dataset):
             idx = idx.tolist()
 
         sample = {}
-
+        
+        # mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos
         for i, fh in enumerate(self.fh_frame.values[idx]):
             data_type = self.fh_frame.columns[i]
             if data_type in self.data_types_to_fetch:
@@ -66,9 +67,9 @@ class SupersampleDataset(Dataset):
                     image = torch.pow(image, INV_GAMMA)
                     image = torch.clamp(image, 0, 1)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
-                    image = torch.unsqueeze(torch.load(img_path)[0, :, :], 0)
+                    image = torch.unsqueeze(torch.load(img_path)[0, :1016, :], 0)
                 else:
-                    image = torch.load(img_path)
+                    image = torch.load(img_path)[:, :1016, :]
 
                 # image = random_crop_tensor(image, self.crop_size)
                 sample[data_type] = image
