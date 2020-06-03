@@ -3,6 +3,9 @@ import dataset
 import numpy as np
 from collections import OrderedDict
 
+GAMMA = 2.2
+INV_GAMMA = 1 / GAMMA
+
 
 def viz_exr(exr_filepath: str):
     img_tensor = dataset.exr_to_tensor(exr_filepath, False)
