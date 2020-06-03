@@ -65,6 +65,10 @@ def main(seed: int,
         'input_channel_size': 3, 'output_channel_size': 3}
         SingleImageSuperResolution(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
 
+    if experiment_name == 'GbufferOnlySuperResolution':
+        model_params = {'input_types': [ "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
+        'input_channel_size': 11, 'output_channel_size': 3}
+        SingleImageSuperResolution(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
     if experiment_name == 'Denoise':
         model_params = {'input_types': ["full", "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],
         'input_channel_size': 14}
