@@ -114,14 +114,14 @@ class DenoiseDataset(Dataset):
                 if data_type in ["full", "clean"]:
                     if self.gamma_trans:
                         image = torch.pow(torch.load(img_path)[:, :1016, :], INV_GAMMA)
-                    else:
                         image = torch.clamp(torch.load(img_path)[:, :1016, :], 0, 1)
                 elif data_type in ["mat_ref", "mat_spec_rough"]:
                     image = torch.unsqueeze(torch.load(img_path)[0, :1016, :], 0)
                 else:
                     image = torch.load(img_path)[:, :1016, :]
+
                 image = random_crop_tensor(image, self.crop_size)
-                sample[data_type] = image.half()
+                sample[data_type] = image
         return sample
 
 
