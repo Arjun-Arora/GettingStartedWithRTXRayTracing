@@ -120,7 +120,7 @@ class DenoiseDataset(Dataset):
                 else:
                     image = torch.load(img_path)[:, :1016, :]
 
-                image = random_crop_tensor(image, self.crop_size)
+                # image = random_crop_tensor(image, self.crop_size)
                 sample[data_type] = image
         return sample
 

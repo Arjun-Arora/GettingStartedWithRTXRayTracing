@@ -196,8 +196,8 @@ def Denoise(writer,
              model_params: dict):
 	#grab model
 
-    model = denoise_model.KPCN_light(input_channels=model_params['input_channel_size']).to(device)
-    apply_kernel = denoise_model.ApplyKernel(21).to(device)
+    model = denoise_model.KPCN_light(input_channels=model_params['input_channel_size'], kernel_size=3).to(device)
+    apply_kernel = denoise_model.ApplyKernel(kernel_size=3).to(device)
 
     loss_criterion = torch.nn.MSELoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -226,7 +226,7 @@ def Denoise(writer,
             optimizer.zero_grad()
 
             kernel = model(x)
-            y_hat = apply_kernel.forward(x, kernel, padding=True)
+            y_hat = apply_kernel.forward(x[:, :3], kernel, padding=True)
             loss = loss_criterion(y_hat, y)
             loss.backward()
 
@@ -243,11 +243,11 @@ def Denoise(writer,
                     writer.add_scalar('Training PSNR (dB)', running_psnr/10, global_step=global_step)
                     running_psnr = 0
                     running_loss = 0
-            if global_step % 1000 == 0:
+            if global_step % 500 == 0:
                 with torch.no_grad():
-                    x_cpu = x.cpu()
-                    y_hat_cpu = y_hat.cpu()
-                    y_cpu = y.cpu()
+                    x_cpu = x.cpu()[:, :3, :, :]
+                    y_hat_cpu = y_hat.cpu()[:, :3, :, :]
+                    y_cpu = y.cpu()[:, :3, :, :]
 
                     img_grid = torchvision.utils.make_grid(x_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
@@ -286,7 +286,7 @@ def Denoise(writer,
                 x = x.to(device)
 
                 kernel = model(x)
-                y_hat = apply_kernel.forward(x, kernel, padding=True)
+                y_hat = apply_kernel.forward(x[:, :3], kernel, padding=True)
 
                 running_val_loss += loss_criterion(y_hat, y).item()
                 running_val_psnr += get_PSNR(y_hat, y)
