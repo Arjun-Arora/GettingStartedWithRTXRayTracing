@@ -193,9 +193,9 @@ def Denoise(writer,
              model_params: dict):
 	#grab model
 
-    model = denoise_model.KPCN_light(input_channels=model_params['input_channel_size']).half().to(device)
+    model = denoise_model.KPCN_light(input_channels=model_params['input_channel_size']).to(device)
     apply_kernel = denoise_model.ApplyKernel(21).to(device)
-    # model = unet.UNet().to(device)
+
     loss_criterion = torch.nn.MSELoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
@@ -205,18 +205,21 @@ def Denoise(writer,
     global_step = 0
     best_val_psnr = 0
     print("Running training on denoiser...")
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
         # training
         loss = 0
         for i, batch in enumerate(train_gen):
             #batch["full","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
-            x = []
-            for i in model_params['input_types']:
-                x.append(batch[i])
-            x = torch.cat(x,dim=1)
+            x, y, y_hat = None, None, None
+            for j, batch in enumerate(val_gen):
+                y = batch['clean'][:, :, :1016, :].to(device)
+                x = []
+                for p in model_params['input_types']:
+                    x.append(batch[p].to(device))
+                x = torch.cat(x, dim=1)
 
-            y = batch['clean'][:, :, :1060, :].to(device)
             x = x.to(device)
+
             optimizer.zero_grad()
 
             kernel = model(x)
@@ -271,16 +274,23 @@ def Denoise(writer,
             running_val_psnr = 0
             x, y, y_hat = None, None, None
             for j, batch in enumerate(val_gen):
-                x, y = batch['half'].to(device), batch['full'][:, :, :1060, :].to(device)
+                y = batch['clean'][:, :, :1016, :].to(device)
+                x = []
+                for p in model_params['input_types']:
+                    x.append(batch[p].to(device))
+                x = torch.cat(x, dim=1)
 
-                y_hat = model(x)
+                x = x.to(device)
+
+                kernel = model(x)
+                y_hat = apply_kernel.forward(x, kernel, padding=True)
 
                 running_val_loss += loss_criterion(y_hat, y).item()
-                running_val_psnr += get_PSNR(y_hat,y)
+                running_val_psnr += get_PSNR(y_hat, y)
 
-            x_cpu = x.cpu()
-            y_hat_cpu = y_hat.cpu()
-            y_cpu = y.cpu()
+            x_cpu = x.cpu()[:, :3, :, :]
+            y_hat_cpu = y_hat.cpu()[:, :3, :, :]
+            y_cpu = y.cpu()[:, :3, :, :]
 
             scheduler.step(running_val_loss / len(val_gen))
 
@@ -293,7 +303,7 @@ def Denoise(writer,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': loss.item()},
-                os.path.join(chkpoint_folder, "exp_smooth_l1_loss_{epoch}.pt".format(epoch=epoch)))
+                os.path.join(chkpoint_folder, "exp_mse_loss_{epoch}.pt".format(epoch=epoch)))
 
             img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)

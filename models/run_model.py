@@ -23,16 +23,8 @@ import supersample_model
 
 import os
 
-
-def main(seed: int,
-         run_name: str,
-         dataset_folder: str,
-         dataloader_params: dict,
-         num_epochs: int,
-         train_percentage: float,
-         experiment_name: str
-         ):
-    #setting universal experiment params
+def main(seed: int, run_name: str, dataset_folder: str, dataloader_params: dict, num_epochs: int, train_percentage: float, experiment_name: str):
+    # setting universal experiment params
     torch.manual_seed(seed)
     np.random.seed(seed)
     writer = SummaryWriter(os.path.join('runs', run_name))
@@ -49,6 +41,8 @@ def main(seed: int,
         data = dataset.SupersampleDataset(dataset_folder, types_to_load)
     elif experiment_name == 'Denoise':
         data = dataset.DenoiseDataset(dataset_folder)
+    else:
+        raise NotImplementedError
 
     #calculating train-val split
     train_size = int(train_percentage * len(data))
@@ -66,15 +60,17 @@ def main(seed: int,
         model_params = {'input_types': ['half'], 'upscale_factor': 2, 
         'input_channel_size': 3, 'output_channel_size': 3}
         SingleImageSuperResolution(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
-
-    if experiment_name == 'GbufferOnlySuperResolution':
+    elif experiment_name == 'GbufferOnlySuperResolution':
         model_params = {'input_types': [ "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 11, 'output_channel_size': 3}
         SingleImageSuperResolution(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
-    if experiment_name == 'Denoise':
+    elif experiment_name == 'Denoise':
         model_params = {'input_types': ["full", "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],
         'input_channel_size': 14}
         Denoise(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
+    else:
+        raise NotImplementedError
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=("Run experiments for ray-tracing model experiments"))
