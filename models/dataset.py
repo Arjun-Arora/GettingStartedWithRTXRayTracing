@@ -188,7 +188,7 @@ def exr_to_tensor(exr_filepath: str, half: bool) -> torch.Tensor:
 
 
 def convert_exrs_to_tensors(src: str, tgt: str):
-    for i, exr_file_name in enumerate(os.listdir(src)):
+    for i, exr_file_name in enumerate(tqdm(os.listdir(src))):
         file_name, file_type = exr_file_name.split('.')
 
         if file_type == 'exr' and not os.path.exists(os.path.join(tgt, "{name}.pt".format(name=file_name))):
