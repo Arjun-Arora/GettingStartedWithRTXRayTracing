@@ -51,12 +51,15 @@ def SingleImageSuperResolution(writer,
         for i, batch in enumerate(train_gen):
             #batch["half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
             y = batch['full'][:, :, :1016, :].to(device)
+            N,C,H,W = y.size()
             if len(model_params['input_types']) > 1:
                 x = []
                 for p in model_params['input_types']:
                     if p == 'half':
-                        x.append(F.interpolate(batch[p], scale_factor=2).to(device))
-                    x.append(batch[p].to(device))
+                        x.append(F.interpolate(batch[p], size=(H,W)).to(device))
+                        # print(F.interpolate(batch[p], size=(H,W)).to(device).size())
+                    else:
+                        x.append(batch[p].to(device))
                 x = torch.cat(x,dim=1)
             else:
                 x = batch[model_params['input_types'][0]]
