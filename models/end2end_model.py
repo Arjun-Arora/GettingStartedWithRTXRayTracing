@@ -16,7 +16,7 @@ class ApplyKernel(nn.Module):
         super(ApplyKernel, self).__init__()
         self.ks = kernel_size
 
-    def forward(self, x, k, padding=False, padding_value=0):
+    def forward(self, x, k, padding=True, padding_value=0):
         """
         :param x: (b, c, hx, wx)
         :param k: pixel-wise kernel (b, ks^2, hk, wk)
@@ -90,19 +90,21 @@ class ESPCN_KPCN(nn.Module):
         self.apply_kernel = ApplyKernel(kernel_size)
 
     def forward(self, x, g):
-        x = torch.cat(x, g)
+        x = torch.cat((x, g), dim=1)
         assert(x.shape[1] == self.input_channel_size)
         x = torch.tanh(self.conv1(x))
         x = torch.tanh(self.conv2(x))
         x_up = torch.sigmoid(self.pixel_shuffle(self.conv3(x)))
 
-        x = torch.cat(x_up, g)
+        x = torch.cat((x_up, g), dim=1)
 
         x = self.conv4(x)
         x = self.resblock(x)
         x = self.conv5(x)
         # x is kernel here
         x = self.softmax(x)
+        print(x_up.shape)
+        print(x.shape)
         return self.apply_kernel(x_up, x), x_up
 
 if __name__ == "__main__":
