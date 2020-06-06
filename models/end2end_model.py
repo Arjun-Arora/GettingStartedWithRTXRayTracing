@@ -78,7 +78,7 @@ class ESPCN_KPCN(nn.Module):
         self.num_res_blocks = 1
 
         # source encoder
-        self.conv4 = conv3x3(input_channels, 14)
+        self.conv4 = conv3x3(input_channel_size, 14)
 
         # spatial-feature extractor
         self.resblock = ResBlock(14, 14)
