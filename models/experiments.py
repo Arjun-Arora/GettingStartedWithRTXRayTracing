@@ -23,6 +23,255 @@ def get_PSNR(model_output, target):
     PSNR = 10 * np.log10(1.0 / mse)
     return PSNR
 
+
+def experiment4b(writer,
+                 device,
+                 train_gen,
+                 val_gen,
+                 num_epochs,
+                 chkpoint_folder,
+                 model_params: dict):
+
+    model_1 = supersample_model.ESPCN(upscale_factor=model_params['upscale_factor'],
+                                    input_channel_size=model_params['input_channel_size'],
+                                    output_channel_size=model_params['output_channel_size']).to(device)
+
+    loss_criterion_1 = torch.nn.SmoothL1Loss().to(device)
+    optimizer_1 = torch.optim.Adam(model_1.parameters(), lr=1e-4)
+    scheduler_1 = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_1)
+
+    model_2 = denoise_model.KPCN_light(input_channels=model_params['input_channel_size'], kernel_size=3).to(device)
+    apply_kernel = denoise_model.ApplyKernel(kernel_size=3).to(device)
+
+    loss_criterion_2 = torch.nn.MSELoss().to(device)
+    optimizer_2 = torch.optim.Adam(model_2.parameters(), lr=1e-4)
+    scheduler_2 = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_2)
+    global_step = 0
+
+    running_loss_1 = 0
+    running_psnr_1 = 0
+    best_val_psnr_1 = 0
+
+    running_loss_2 = 0
+    running_psnr_2 = 0
+    best_val_psnr_2 = 0
+
+    print("Running training...")
+    for epoch in tqdm(range(num_epochs)):
+        loss_1 = 0
+        loss_2 = 0
+        for i,batch in enumerate(train_gen):
+            y1 = batch['full'][:, :, :1016, :].to(device)
+            N,C,H,W = y1.size()
+            x1 = []
+            for p in model_params['input_types']:
+                if p == 'half':
+                    x1.append(F.interpolate(batch[p], size=(H,W)))
+                    # print(F.interpolate(batch[p], size=(H,W)).to(device).size())
+                else:
+                    x1.append(batch[p])
+            x1 = torch.cat(x1,dim=1)
+            x1 = x1.to(device)
+
+            optimizer_1.zero_grad()
+            y_hat_1 = model_1(x1)
+            loss_1  = loss_criterion_1(y_hat_1, y1)
+            loss_1.backward()
+
+            optimizer_1.step()
+            running_loss_1 += loss_1.item()
+            running_psnr_1 += get_PSNR(y_hat_1, y1)
+
+            #set y_hat_1 separate from previous model
+            y_hat_1.requires_grad = False;
+
+            x2 = y_hat_1
+            y2 = batch['clean'][:, :, :1016, :].to(device)
+
+            for p in model_params['input_types']:
+                if p != 'half':
+                    x2 = torch.cat((x2,batch[p].to(device)),dim=1)
+
+            optimizer_2.zero_grad()
+
+            kernel = model_2(x2)
+            y_hat_2 = apply_kernel.forward(x2[:, :3], kernel, padding=True)
+            loss_2 = loss_criterion_2(y_hat_2, y2)
+            loss_2.backward()
+
+            optimizer_2.step()
+            running_loss_2 += loss_2.item()
+            running_psnr_2 += get_PSNR(y_hat_2,y2)
+
+            global_step = epoch * len(train_gen) + i
+
+            if global_step % 10 == 0 and global_step > 0:
+                with torch.no_grad():
+                    writer.add_scalar('Training Loss_1', running_loss_1/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR_1 (dB)', running_psnr_1/10, global_step=global_step)
+                    writer.add_scalar('Training Loss_2', running_loss_2/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR_2 (dB)', running_psnr_2/10, global_step=global_step)
+                    running_loss_1 = 0
+                    running_psnr_1 = 0
+                    running_loss_2 = 0
+                    running_psnr_2 = 0 
+            if global_step % 1000 == 0:
+                with torch.no_grad():
+                    x1_cpu = x1.cpu()[:, :3, :, :]
+                    y_hat_1cpu = y_hat_1.cpu()[:, :3, :, :]
+                    y1_cpu = y1.cpu()[:, :3, :, :]
+
+                    img_grid = torchvision.utils.make_grid(x1_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Training Input 1', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y_hat_1cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Model Output 1', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y1_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Ground Truth 1', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y1_cpu - y_hat_1cpu)
+                    img_grid = viz.tensor_preprocess(img_grid, difference=True)
+                    writer.add_image('Difference (GT and Model Output) 1', img_grid, global_step=global_step, dataformats='HW')
+
+
+                    #second set
+                    x2_cpu = x2.cpu()[:, :3, :, :]
+                    y_hat_2cpu = y_hat_2.cpu()[:, :3, :, :]
+                    y2_cpu = y2.cpu()[:, :3, :, :]
+                    img_grid = torchvision.utils.make_grid(x2_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+
+                    writer.add_image('Training Input 2', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y_hat_2cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Model Output 2', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y2_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Ground Truth 2', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y2_cpu - y_hat_2cpu)
+                    img_grid = viz.tensor_preprocess(img_grid, difference=True)
+                    writer.add_image('Difference (GT and Model Output) 2', img_grid, global_step=global_step, dataformats='HW')
+
+        with torch.set_grad_enabled(False):
+            running_val_loss_1 = 0
+            running_val_psnr_1 = 0
+
+            running_val_loss_2 = 0
+            running_val_psnr_2 = 0
+            x1, y1, y1_hat = None, None, None
+            for j, batch in enumerate(val_gen):
+                y1 = batch['full'][:, :, :1016, :].to(device)
+                N,C,H,W = y1.size()
+                x1 = []
+                for p in model_params['input_types']:
+                    if p == 'half':
+                        x1.append(F.interpolate(batch[p], size=(H,W)))
+                        # print(F.interpolate(batch[p], size=(H,W)).to(device).size())
+                    else:
+                        x1.append(batch[p])
+                x1 = torch.cat(x1,dim=1)
+                x1 = x1.to(device)
+                
+                y_hat_1 = model_1(x1)
+
+                running_val_loss_1 += loss_criterion_1(y_hat_1, y1).item()
+                running_val_psnr_1 += get_PSNR(y_hat_1, y1)
+
+                #set y_hat_1 separate from previous model
+                y_hat_1.requires_grad = False;
+
+                x2 = y_hat_1
+                y2 = batch['clean'][:, :, :1016, :].to(device)
+
+                for p in model_params['input_types']:
+                    if p != 'half':
+                        x2 = torch.cat((x2,batch[p].to(device)),dim=1)
+
+                kernel = model_2(x2)
+                y_hat_2 = apply_kernel.forward(x2[:, :3], kernel, padding=True)
+
+                running_loss_2 += loss_criterion_2(y_hat_2, y2).item()
+                running_psnr_2 += get_PSNR(y_hat_2,y2)
+
+            x1_cpu = x1.cpu()[:, :3, :, :]
+            y_hat_1cpu = y_hat_1.cpu()[:, :3, :, :]
+            y1_cpu = y1.cpu()[:, :3, :, :]
+
+            x2_cpu = x2.cpu()[:, :3, :, :]
+            y_hat_2cpu = y_hat_2.cpu()[:, :3, :, :]
+            y2_cpu = y2.cpu()[:, :3, :, :]
+
+            scheduler_1.step(running_val_loss_1 / len(val_gen))
+            scheduler_2.step(running_val_loss_2 / len(val_gen))
+
+            writer.add_scalar('Validation Loss 1', running_val_loss_1 / len(val_gen), global_step=global_step)
+            writer.add_scalar('Validation PSNR (dB) 1', running_val_psnr_1 / len(val_gen), global_step=global_step)
+
+            writer.add_scalar('Validation Loss 2', running_val_loss_2 / len(val_gen), global_step=global_step)
+            writer.add_scalar('Validation PSNR (dB) 2', running_val_psnr_2 / len(val_gen), global_step=global_step)
+
+            if running_val_psnr_1 > best_val_psnr_1:
+                running_val_psnr_1 = best_val_psnr_1
+                torch.save({
+                'epoch': epoch,
+                'model_state_dict': model_1.state_dict(),
+                'optimizer_state_dict': optimizer_1.state_dict(),
+                'loss': loss_1.item()},
+                os.path.join(chkpoint_folder, "super_res_{epoch}.pt".format(epoch=epoch)))
+            if running_val_psnr_2 > best_val_psnr_2:
+                running_val_psnr_2 = best_val_psnr_2
+                torch.save({
+                'epoch': epoch,
+                'model_state_dict': model_2.state_dict(),
+                'optimizer_state_dict': optimizer_2.state_dict(),
+                'loss': loss_2.item()},
+                os.path.join(chkpoint_folder, "denoiser_{epoch}.pt".format(epoch=epoch)))
+
+
+            img_grid = torchvision.utils.make_grid(x1_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            
+            writer.add_image('Val Input 1', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y_hat_1cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Model Output 1', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y1_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Ground Truth 1', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y1_cpu - y_hat_1cpu)
+            img_grid = viz.tensor_preprocess(img_grid, difference=True)
+            writer.add_image('Val Difference (GT and Model Output) 1', img_grid, global_step=global_step, dataformats='HW')
+
+            #second
+            img_grid = torchvision.utils.make_grid(x2_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            
+            writer.add_image('Val Input 2', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y_hat_2cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Model Output 2', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y2_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Ground Truth 2', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y2_cpu - y_hat_2cpu)
+            img_grid = viz.tensor_preprocess(img_grid, difference=True)
+            writer.add_image('Val Difference (GT and Model Output) 2', img_grid, global_step=global_step, dataformats='HW')
+
+
+
 def SingleImageSuperResolution(writer,
 							 device,
 							 train_gen,
