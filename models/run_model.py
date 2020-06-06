@@ -19,6 +19,7 @@ import argparse
 # our imports 
 from experiments import SingleImageSuperResolution
 from experiments import Denoise
+from experiments import experiment4b
 import supersample_model
 
 import os
