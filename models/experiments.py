@@ -83,7 +83,7 @@ def experiment4b(writer,
             running_psnr_1 += get_PSNR(y_hat_1, y1)
 
             #set y_hat_1 separate from previous model
-            y_hat_1.requires_grad = False;
+            y_hat_1 = y_hat_1.detach()
 
             x2 = y_hat_1
             y2 = batch['clean'][:, :, :1016, :].to(device)
@@ -185,7 +185,7 @@ def experiment4b(writer,
                 running_val_psnr_1 += get_PSNR(y_hat_1, y1)
 
                 #set y_hat_1 separate from previous model
-                y_hat_1.requires_grad = False;
+                y_hat_1 = y_hat_1.detach()
 
                 x2 = y_hat_1
                 y2 = batch['clean'][:, :, :1016, :].to(device)
