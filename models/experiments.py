@@ -3,6 +3,7 @@ import torch
 import torchvision
 import supersample_model
 import denoise_model
+import end2end_model
 import viz
 import torch.nn.functional as F
 import numpy as np
@@ -270,6 +271,145 @@ def experiment4b(writer,
             img_grid = viz.tensor_preprocess(img_grid, difference=True)
             writer.add_image('Val Difference (GT and Model Output) 2', img_grid, global_step=global_step, dataformats='HW')
 
+
+def experiment4c(writer,
+                 device,
+                 train_gen,
+                 val_gen,
+                 num_epochs,
+                 chkpoint_folder,
+                 model_params: dict):
+
+    model = end2end_model.ESPCN_KPCN(upscale_factor=model_params['upscale_factor'],
+                                    input_channel_size=model_params['input_channel_size'],
+                                    kernel_size=3).to(device)
+
+    loss_criterion = torch.nn.MSELoss().to(device)
+    optimizer = torch.optim.Adam(model_2.parameters(), lr=1e-4)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_2)
+    global_step = 0
+
+    running_loss = 0
+    running_psnr = 0
+    best_val_psnr = 0
+
+    print("Running training...")
+    for epoch in tqdm(range(num_epochs)):
+        loss = 0
+        for i,batch in enumerate(train_gen):
+            y = batch['full'][:, :, :1016, :].to(device)
+            N,C,H,W = y.size()
+            x = F.interpolate(batch['half'], size=(H,W)).to(device)
+            g = []
+            for p in model_params['input_types']:
+                if p != 'half':
+                    g.append(batch[p])
+            g = torch.cat(g,dim=1)
+            g = g.to(device)
+
+            optimizer.zero_grad()
+            y_denoise, y_supersample = model(x, g)
+            loss  = loss_criterion(y_denoise, y)
+            loss.backward()
+
+            optimizer.step()
+            running_loss += loss.item()
+            running_psnr += get_PSNR(y_hat, y)
+
+            global_step = epoch * len(train_gen) + i
+
+            if global_step % 10 == 0 and global_step > 0:
+                with torch.no_grad():
+                    writer.add_scalar('Training Loss', running_loss/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR (dB)', running_psnr/10, global_step=global_step)
+                    running_loss = 0
+                    running_psnr = 0
+            if global_step % 1000 == 0:
+                with torch.no_grad():
+                    x_cpu = x.cpu()[:, :3, :, :]
+                    y_denoise_cpu = y_denoise.cpu()[:, :3, :, :]
+                    y_supersample_cpu = y_supersample.cpu()[:, :3, :, :]
+                    y_cpu = y.cpu()[:, :3, :, :]
+
+                    img_grid = torchvision.utils.make_grid(x_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Training Input', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y_denoise_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Model Output Denoise', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y_supersample_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Model Output Supersample', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Ground Truth', img_grid, global_step=global_step)
+
+                    img_grid = torchvision.utils.make_grid(y_cpu - y_denoise_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid, difference=True)
+                    writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+
+        with torch.set_grad_enabled(False):
+            running_val_loss = 0
+            running_val_psnr = 0
+            for j, batch in enumerate(val_gen):
+                y = batch['full'][:, :, :1016, :].to(device)
+                N,C,H,W = y.size()
+                x = F.interpolate(batch['half'], size=(H,W)).to(device)
+                g = []
+                for p in model_params['input_types']:
+                    if p != 'half':
+                        g.append(batch[p])
+                g = torch.cat(g,dim=1)
+                g = g.to(device)
+
+                y_denoise, y_supersample = model(x, g)
+                loss  = loss_criterion(y_denoise, y)
+
+                running_loss += loss.item()
+                running_psnr += get_PSNR(y_hat, y)
+
+            x_cpu = x.cpu()[:, :3, :, :]
+            y_denoise_cpu = y_denoise.cpu()[:, :3, :, :]
+            y_supersample_cpu = y_supersample.cpu()[:, :3, :, :]
+            y_cpu = y.cpu()[:, :3, :, :]
+
+            scheduler.step(running_val_loss / len(val_gen))
+
+            writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
+            writer.add_scalar('Validation PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
+
+            if running_val_psnr > best_val_psnr:
+                running_val_psnr = best_val_psnr
+                torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': loss.item()},
+                os.path.join(chkpoint_folder, "end_to_end_{epoch}.pt".format(epoch=epoch)))
+
+            img_grid = torchvision.utils.make_grid(xcpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            
+            writer.add_image('Val Input', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y_denoise_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Model Output Denoise', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y_supersample_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Model Output Supersample', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Ground Truth', img_grid, global_step=global_step)
+
+            img_grid = torchvision.utils.make_grid(y_cpu - y_denoise_cpu)
+            img_grid = viz.tensor_preprocess(img_grid, difference=True)
+            writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
 
 
 def SingleImageSuperResolution(writer,

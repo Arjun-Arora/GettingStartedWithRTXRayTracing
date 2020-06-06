@@ -57,6 +57,9 @@ def main(seed: int,
     elif experiment_name == 'experiment4b':
         types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
+    elif experiment_name == 'experiment4c':
+        types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
+        data = dataset.SupersampleDataset(dataset_folder,types_to_load)
     else:
         raise NotImplementedError
     #calculating train-val split
@@ -87,6 +90,10 @@ def main(seed: int,
         model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 14, 'output_channel_size': 3}
         experiment4b(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
+    elif experiment_name == 'experiment4c':
+        model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
+        'input_channel_size': 14, 'output_channel_size': 3}
+        experiment4c(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)   
     elif experiment_name == 'Denoise':
         model_params = {'input_types': ["full", "mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],
         'input_channel_size': 14}
