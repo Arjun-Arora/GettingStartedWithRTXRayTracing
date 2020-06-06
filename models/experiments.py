@@ -61,7 +61,7 @@ def experiment4b(writer,
     for epoch in tqdm(range(num_epochs)):
         loss_1 = 0
         loss_2 = 0
-        for i,batch in enumerate(train_gen):
+        for i,batch in enumerate(tqdm(train_gen)):
             y1 = batch['full'][:, :, :1016, :].to(device)
             N,C,H,W = y1.size()
             x1 = []
