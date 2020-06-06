@@ -103,8 +103,6 @@ class ESPCN_KPCN(nn.Module):
         x = self.conv5(x)
         # x is kernel here
         x = self.softmax(x)
-        print(x_up.shape)
-        print(x.shape)
         return self.apply_kernel(x_up, x), x_up
 
 if __name__ == "__main__":

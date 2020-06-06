@@ -285,12 +285,13 @@ def experiment4c(writer,
                                     kernel_size=3).to(device)
 
     loss_criterion = torch.nn.MSELoss().to(device)
-    optimizer = torch.optim.Adam(model_2.parameters(), lr=1e-4)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
     global_step = 0
 
     running_loss = 0
     running_psnr = 0
+    running_psnr_sr = 0
     best_val_psnr = 0
 
     print("Running training...")
@@ -314,7 +315,8 @@ def experiment4c(writer,
 
             optimizer.step()
             running_loss += loss.item()
-            running_psnr += get_PSNR(y_hat, y)
+            running_psnr += get_PSNR(y_denoise, y)
+            running_psnr_sr += get_PSNR(y_supersample, y)
 
             global_step = epoch * len(train_gen) + i
 
@@ -322,6 +324,7 @@ def experiment4c(writer,
                 with torch.no_grad():
                     writer.add_scalar('Training Loss', running_loss/10, global_step=global_step)
                     writer.add_scalar('Training PSNR (dB)', running_psnr/10, global_step=global_step)
+                    writer.add_scalar('Training PSNR SR(dB)', running_psnr_sr/10, global_step=global_step)
                     running_loss = 0
                     running_psnr = 0
             if global_step % 1000 == 0:
@@ -354,6 +357,8 @@ def experiment4c(writer,
         with torch.set_grad_enabled(False):
             running_val_loss = 0
             running_val_psnr = 0
+            running_val_psnr_sr = 0
+
             for j, batch in enumerate(val_gen):
                 y = batch['full'][:, :, :1016, :].to(device)
                 N,C,H,W = y.size()
@@ -368,8 +373,9 @@ def experiment4c(writer,
                 y_denoise, y_supersample = model(x, g)
                 loss  = loss_criterion(y_denoise, y)
 
-                running_loss += loss.item()
-                running_psnr += get_PSNR(y_hat, y)
+                running_val_loss += loss.item()
+                running_val_psnr += get_PSNR(y_denoise, y)
+                running_val_psnr_sr += get_PSNR(y_supersample, y)
 
             x_cpu = x.cpu()[:, :3, :, :]
             y_denoise_cpu = y_denoise.cpu()[:, :3, :, :]
@@ -380,6 +386,7 @@ def experiment4c(writer,
 
             writer.add_scalar('Validation Loss', running_val_loss / len(val_gen), global_step=global_step)
             writer.add_scalar('Validation PSNR (dB)', running_val_psnr / len(val_gen), global_step=global_step)
+            writer.add_scalar('Validation PSNR SR(dB)', running_val_psnr_sr / len(val_gen), global_step=global_step)
 
             if running_val_psnr > best_val_psnr:
                 running_val_psnr = best_val_psnr
