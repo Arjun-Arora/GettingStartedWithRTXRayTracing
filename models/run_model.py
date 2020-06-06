@@ -27,6 +27,7 @@ import os
 
 def main(seed: int,
          run_name: str,
+         writer_folder: str,
          dataset_folder: str,
          dataloader_params: dict,
          num_epochs: int,
@@ -36,7 +37,7 @@ def main(seed: int,
     #setting universal experiment params
     torch.manual_seed(seed)
     np.random.seed(seed)
-    writer = SummaryWriter(os.path.join('runs', run_name))
+    writer = SummaryWriter(os.path.join(writer_folder, run_name))
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda:0" if use_cuda else "cpu")
     print("Using device", device)
@@ -105,6 +106,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_percentage',default = 0.9,help=("percentage of dataset to use in train vs val"))
     parser.add_argument('--num_epochs',default=100)
     parser.add_argument('--dataset_folder',default='processed')
+    parser.add_argument('--writer_folder',default='runs')
     parser.add_argument('--experiment_name',default='SingleImageSuperResolution',help=("decides which experiment to run"))
     args = parser.parse_args()
     seed = int(args.seed)
@@ -114,10 +116,12 @@ if __name__ == '__main__':
     train_percentage = float(args.train_percentage)
     num_epochs = int(args.num_epochs)
     dataset_folder= str(args.dataset_folder)
+    writer_folder=str(args.writer_folder)
     experiment_name = str(args.experiment_name)
     run_name = str(args.run_name)
     main(seed,
         run_name,
+        writer_folder,
         dataset_folder,
         dataloader_params,
         num_epochs,
