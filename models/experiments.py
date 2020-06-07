@@ -397,7 +397,7 @@ def experiment4c(writer,
                 'loss': loss.item()},
                 os.path.join(chkpoint_folder, "end_to_end_{epoch}.pt".format(epoch=epoch)))
 
-            img_grid = torchvision.utils.make_grid(xcpu)
+            img_grid = torchvision.utils.make_grid(x_cpu)
             img_grid = viz.tensor_preprocess(img_grid)
             
             writer.add_image('Val Input', img_grid, global_step=global_step)
