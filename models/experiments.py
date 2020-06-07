@@ -198,8 +198,8 @@ def experiment4b(writer,
                 kernel = model_2(x2)
                 y_hat_2 = apply_kernel.forward(x2[:, :3], kernel, padding=True)
 
-                running_loss_2 += loss_criterion_2(y_hat_2, y2).item()
-                running_psnr_2 += get_PSNR(y_hat_2,y2)
+                running_val_loss_2 += loss_criterion_2(y_hat_2, y2).item()
+                running_val_psnr_2 += get_PSNR(y_hat_2,y2)
 
             x1_cpu = x1.cpu()[:, :3, :, :]
             y_hat_1cpu = y_hat_1.cpu()[:, :3, :, :]
@@ -601,15 +601,14 @@ def Denoise(writer,
     for epoch in tqdm(range(num_epochs)):
         # training
         loss = 0
-        for i, batch in enumerate(train_gen):
+        for i, batch in enumerate(tqdm(train_gen)):
             #batch["full","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"]
             x, y, y_hat = None, None, None
-            for j, batch in enumerate(val_gen):
-                y = batch['clean'][:, :, :1016, :].to(device)
-                x = []
-                for p in model_params['input_types']:
-                    x.append(batch[p].to(device))
-                x = torch.cat(x, dim=1)
+            y = batch['clean'][:, :, :1016, :].to(device)
+            x = []
+            for p in model_params['input_types']:
+                x.append(batch[p].to(device))
+            x = torch.cat(x, dim=1)
 
             x = x.to(device)
 
@@ -655,12 +654,6 @@ def Denoise(writer,
                     img_grid = viz.tensor_preprocess(img_grid, difference=True)
                     writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
 
-        # torch.save({
-        #     'epoch': epoch,
-        #     'model_state_dict': model.state_dict(),
-        #     'optimizer_state_dict': optimizer.state_dict(),
-        #     'loss': loss.item()},
-        #     "model_checkpoints/denoise/exp_MSE_loss_{epoch}.pt".format(epoch=epoch))
 
         with torch.set_grad_enabled(False):
             running_val_loss = 0
