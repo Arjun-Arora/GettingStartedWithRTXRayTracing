@@ -21,6 +21,7 @@ from experiments import SingleImageSuperResolution
 from experiments import Denoise
 from experiments import experiment4b
 from experiments import experiment4c
+from experiments import experiment4sppPSNR
 import supersample_model
 
 import os
@@ -62,7 +63,7 @@ def main(seed: int,
         types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
     elif experiment_name == 'experiment4sppPSNR':
-        types_to_load = ['half','full','clean']
+        types_to_load = ['half','full','clean', "4spp"]
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
     else:
         raise NotImplementedError
