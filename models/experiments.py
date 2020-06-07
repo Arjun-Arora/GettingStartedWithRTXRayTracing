@@ -298,7 +298,7 @@ def experiment4c(writer,
     for epoch in tqdm(range(num_epochs)):
         loss = 0
         for i,batch in enumerate(train_gen):
-            y = batch['full'][:, :, :1016, :].to(device)
+            y = batch['clean'][:, :, :1016, :].to(device)
             N,C,H,W = y.size()
             x = F.interpolate(batch['half'], size=(H,W)).to(device)
             g = []
@@ -417,6 +417,57 @@ def experiment4c(writer,
             img_grid = torchvision.utils.make_grid(y_cpu - y_denoise_cpu)
             img_grid = viz.tensor_preprocess(img_grid, difference=True)
             writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+
+def experiment4sppPSNR(writer,
+                 device,
+                 val_gen):
+
+    psnr_1spp = 0
+    psnr_4spp = 0
+
+    print("Running PSNR testing...")
+    with torch.set_grad_enabled(False):
+        for j, batch in enumerate(val_gen):
+            y = batch['clean'][:, :, :1016, :].to(device)
+            N,C,H,W = y.size()
+            x_1spp = batch['full'][:, :, :1016, :].to(device)
+            x_4spp = batch['4spp'][:, :, :1016, :].to(device)
+
+            psnr_1spp += get_PSNR(y_supersample, y)
+            psnr_4spp += get_PSNR(y_denoise, y)
+        
+        psnr_1spp = psnr_1spp / len(val_gen)
+        psnr_4spp = psnr_4spp / len(val_gen)
+
+        print("PSNR 1spp/clean Valset: {}".format(psnr_1spp))
+        print("PSNR 4spp/clean Valset: {}".format(psnr_4spp))
+        
+        x_1spp = x_1spp.cpu()[:, :3, :, :]
+        x_4spp = x_4spp.cpu()[:, :3, :, :]
+        x_half = x_half.cpu()[:, :3, :, :]
+
+        writer.add_scalar('Validation PSNR 1spp(dB)', psnr_1spp, global_step=0)
+        writer.add_scalar('Validation PSNR 4spp(dB)', psnr_4spp, global_step=0)
+
+        img_grid = torchvision.utils.make_grid(x_1spp)
+        img_grid = viz.tensor_preprocess(img_grid)
+        writer.add_image('Val 1spp', img_grid, global_step=0)
+
+        img_grid = torchvision.utils.make_grid(x_4spp)
+        img_grid = viz.tensor_preprocess(img_grid)
+        writer.add_image('Val 4spp', img_grid, global_step=0)
+
+        img_grid = torchvision.utils.make_grid(y)
+        img_grid = viz.tensor_preprocess(img_grid)
+        writer.add_image('Val Clean', img_grid, global_step=0)
+
+        img_grid = torchvision.utils.make_grid(x_1spp - y)
+        img_grid = viz.tensor_preprocess(img_grid, difference=True)
+        writer.add_image('Val Difference (1spp - Clean)', img_grid, global_step=global_step, dataformats='HW')
+
+        img_grid = torchvision.utils.make_grid(x_4spp - y)
+        img_grid = viz.tensor_preprocess(img_grid, difference=True)
+        writer.add_image('Val Difference (4spp - Clean)', img_grid, global_step=global_step, dataformats='HW')
 
 
 def SingleImageSuperResolution(writer,
