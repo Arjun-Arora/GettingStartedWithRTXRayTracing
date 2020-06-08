@@ -486,14 +486,12 @@ def experiment4d(writer,
             optimizer_2.zero_grad()
             y_denoise, y_supersample = model(x, g)
             loss_1  = loss_criterion_1(y_denoise, y)
+            loss_2 = loss_criterion_2(y_supersample,y_full)
+            loss_2.backward(retain_graph=True)
             loss_1.backward()
 
-            loss_2 = loss_criterion_2(y_supersample,y_full)
-            loss_2.backward()
-
-
-            optimizer_1.step()
             optimizer_2.step()
+            optimizer_1.step()
 
             running_loss += loss_1.item()
             running_loss_sr += loss_2.item()
