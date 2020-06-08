@@ -327,6 +327,7 @@ def experiment4c(writer,
                     writer.add_scalar('Training PSNR SR(dB)', running_psnr_sr/10, global_step=global_step)
                     running_loss = 0
                     running_psnr = 0
+                    running_psnr_sr = 0
             if global_step % 1000 == 0:
                 with torch.no_grad():
                     x_cpu = x.cpu()[:, :3, :, :]
@@ -360,7 +361,7 @@ def experiment4c(writer,
             running_val_psnr_sr = 0
 
             for j, batch in enumerate(val_gen):
-                y = batch['full'][:, :, :1016, :].to(device)
+                y = batch['clean'][:, :, :1016, :].to(device)
                 N,C,H,W = y.size()
                 x = F.interpolate(batch['half'], size=(H,W)).to(device)
                 g = []
@@ -468,6 +469,7 @@ def experiment4sppPSNR(writer,
         img_grid = torchvision.utils.make_grid(x_4spp - y)
         img_grid = viz.tensor_preprocess(img_grid, difference=True)
         writer.add_image('Val Difference (4spp - Clean)', img_grid, global_step=0, dataformats='HW')
+
 
 
 def SingleImageSuperResolution(writer,
