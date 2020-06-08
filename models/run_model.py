@@ -22,6 +22,7 @@ from experiments import Denoise
 from experiments import experiment4b
 from experiments import experiment4c
 from experiments import experiment4sppPSNR
+from experiments import experiment4d
 import supersample_model
 
 import os

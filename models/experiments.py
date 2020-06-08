@@ -452,7 +452,7 @@ def experiment4d(writer,
 
     loss_criterion_1 = torch.nn.MSELoss().to(device)
     optimizer_1 = torch.optim.Adam(model.parameters(), lr=1e-4)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer_1)
 
     loss_criterion_2 = torch.nn.MSELoss().to(device)
     optimizer_2 = torch.optim.Adam(model.parameters(), lr=1e-4)
