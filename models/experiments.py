@@ -299,6 +299,7 @@ def experiment4c(writer,
         loss = 0
         for i,batch in enumerate(train_gen):
             y = batch['clean'][:, :, :1016, :].to(device)
+            y_full = batch['full'][:, :, :1016, :].to(device)
             N,C,H,W = y.size()
             x = F.interpolate(batch['half'], size=(H,W)).to(device)
             g = []
@@ -316,7 +317,7 @@ def experiment4c(writer,
             optimizer.step()
             running_loss += loss.item()
             running_psnr += get_PSNR(y_denoise, y)
-            running_psnr_sr += get_PSNR(y_supersample, y)
+            running_psnr_sr += get_PSNR(y_supersample, y_full)
 
             global_step = epoch * len(train_gen) + i
 
@@ -334,6 +335,7 @@ def experiment4c(writer,
                     y_denoise_cpu = y_denoise.cpu()[:, :3, :, :]
                     y_supersample_cpu = y_supersample.cpu()[:, :3, :, :]
                     y_cpu = y.cpu()[:, :3, :, :]
+                    y_full_cpu = y_full.cpu()[:, :3, :, :]
 
                     img_grid = torchvision.utils.make_grid(x_cpu)
                     img_grid = viz.tensor_preprocess(img_grid)
@@ -351,9 +353,17 @@ def experiment4c(writer,
                     img_grid = viz.tensor_preprocess(img_grid)
                     writer.add_image('Ground Truth', img_grid, global_step=global_step)
 
+                    img_grid = torchvision.utils.make_grid(y_full_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid)
+                    writer.add_image('Ground Truth Supersample', img_grid, global_step=global_step)
+
                     img_grid = torchvision.utils.make_grid(y_cpu - y_denoise_cpu)
                     img_grid = viz.tensor_preprocess(img_grid, difference=True)
                     writer.add_image('Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+
+                    img_grid = torchvision.utils.make_grid(y_full_cpu - y_supersample_cpu)
+                    img_grid = viz.tensor_preprocess(img_grid, difference=True)
+                    writer.add_image('Difference (SR GT and Model SR Output)', img_grid, global_step=global_step, dataformats='HW')
 
         with torch.set_grad_enabled(False):
             running_val_loss = 0
@@ -362,6 +372,7 @@ def experiment4c(writer,
 
             for j, batch in enumerate(val_gen):
                 y = batch['clean'][:, :, :1016, :].to(device)
+                y_full = batch['full'][:, :, :1016, :].to(device)
                 N,C,H,W = y.size()
                 x = F.interpolate(batch['half'], size=(H,W)).to(device)
                 g = []
@@ -376,12 +387,13 @@ def experiment4c(writer,
 
                 running_val_loss += loss.item()
                 running_val_psnr += get_PSNR(y_denoise, y)
-                running_val_psnr_sr += get_PSNR(y_supersample, y)
+                running_val_psnr_sr += get_PSNR(y_supersample, y_full)
 
             x_cpu = x.cpu()[:, :3, :, :]
             y_denoise_cpu = y_denoise.cpu()[:, :3, :, :]
             y_supersample_cpu = y_supersample.cpu()[:, :3, :, :]
             y_cpu = y.cpu()[:, :3, :, :]
+            y_full_cpu = y_full.cpu()[:, :3, :, :]
 
             scheduler.step(running_val_loss / len(val_gen))
 
@@ -415,9 +427,17 @@ def experiment4c(writer,
             img_grid = viz.tensor_preprocess(img_grid)
             writer.add_image('Val Ground Truth', img_grid, global_step=global_step)
 
+            img_grid = torchvision.utils.make_grid(y_full_cpu)
+            img_grid = viz.tensor_preprocess(img_grid)
+            writer.add_image('Val Ground Truth Supersample', img_grid, global_step=global_step)
+
             img_grid = torchvision.utils.make_grid(y_cpu - y_denoise_cpu)
             img_grid = viz.tensor_preprocess(img_grid, difference=True)
             writer.add_image('Val Difference (GT and Model Output)', img_grid, global_step=global_step, dataformats='HW')
+
+            img_grid = torchvision.utils.make_grid(y_full_cpu - y_supersample_cpu)
+            img_grid = viz.tensor_preprocess(img_grid, difference=True)
+            writer.add_image('Val Difference (SR GT and Model SR Output)', img_grid, global_step=global_step, dataformats='HW')
 
 def experiment4sppPSNR(writer,
                  device,
