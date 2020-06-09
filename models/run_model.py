@@ -19,11 +19,12 @@ import argparse
 # our imports 
 from experiments import SingleImageSuperResolution
 from experiments import Denoise
+from experiments import experiment4a
 from experiments import experiment4b
 from experiments import experiment4c
 from experiments import experiment4sppPSNR
 from experiments import experiment4d
-from experiments import experiment4a
+
 import supersample_model
 
 import os
