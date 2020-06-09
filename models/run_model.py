@@ -105,7 +105,7 @@ def main(seed: int,
         'input_channel_size': 14, 'output_channel_size': 3}
         assert model_superres_dir != None,"model_superres_dir needs to be a path, not None"
         assert model_denoise_dir != None,"model_denoise_dir needs to be a path, not None"
-        experiment4b(writer, device, val_gen,model_superres_dir,model_denoise_dir, model_params)
+        experiment4a(writer, device, val_gen,model_superres_dir,model_denoise_dir, model_params)
     elif experiment_name == 'experiment4b':
         model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 14, 'output_channel_size': 3}
