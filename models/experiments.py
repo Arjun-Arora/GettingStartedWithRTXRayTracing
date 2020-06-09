@@ -106,37 +106,37 @@ def experiment4a(writer,
     img_grid = torchvision.utils.make_grid(x1_cpu)
     img_grid = viz.tensor_preprocess(img_grid)
     
-    writer.add_image('Val Input 1', img_grid, global_step=global_step)
+    writer.add_image('Val Input 1', img_grid, global_step=0)
 
     img_grid = torchvision.utils.make_grid(y_hat_1cpu)
     img_grid = viz.tensor_preprocess(img_grid)
-    writer.add_image('Val Model Output 1', img_grid, global_step=global_step)
+    writer.add_image('Val Model Output 1', img_grid, global_step=0)
 
     img_grid = torchvision.utils.make_grid(y1_cpu)
     img_grid = viz.tensor_preprocess(img_grid)
-    writer.add_image('Val Ground Truth 1', img_grid, global_step=global_step)
+    writer.add_image('Val Ground Truth 1', img_grid, global_step=0)
 
     img_grid = torchvision.utils.make_grid(y1_cpu - y_hat_1cpu)
     img_grid = viz.tensor_preprocess(img_grid, difference=True)
-    writer.add_image('Val Difference (GT and Model Output) 1', img_grid, global_step=global_step, dataformats='HW')
+    writer.add_image('Val Difference (GT and Model Output) 1', img_grid, global_step=0, dataformats='HW')
 
     #second
     img_grid = torchvision.utils.make_grid(x2_cpu)
     img_grid = viz.tensor_preprocess(img_grid)
     
-    writer.add_image('Val Input 2', img_grid, global_step=global_step)
+    writer.add_image('Val Input 2', img_grid, global_step=0)
 
     img_grid = torchvision.utils.make_grid(y_hat_2cpu)
     img_grid = viz.tensor_preprocess(img_grid)
-    writer.add_image('Val Model Output 2', img_grid, global_step=global_step)
+    writer.add_image('Val Model Output 2', img_grid, global_step=0)
 
     img_grid = torchvision.utils.make_grid(y2_cpu)
     img_grid = viz.tensor_preprocess(img_grid)
-    writer.add_image('Val Ground Truth 2', img_grid, global_step=global_step)
+    writer.add_image('Val Ground Truth 2', img_grid, global_step=0)
 
     img_grid = torchvision.utils.make_grid(y2_cpu - y_hat_2cpu)
     img_grid = viz.tensor_preprocess(img_grid, difference=True)
-    writer.add_image('Val Difference (GT and Model Output) 2', img_grid, global_step=global_step, dataformats='HW')
+    writer.add_image('Val Difference (GT and Model Output) 2', img_grid, global_step=0, dataformats='HW')
 
 
 def experiment4b(writer,
