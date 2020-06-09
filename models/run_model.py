@@ -24,6 +24,7 @@ from experiments import experiment4b
 from experiments import experiment4c
 from experiments import experiment4sppPSNR
 from experiments import experiment4d
+from inference import run4c
 
 import supersample_model
 
@@ -39,7 +40,8 @@ def main(seed: int,
          train_percentage: float,
          experiment_name: str,
          model_superres_dir,
-         model_denoise_dir
+         model_denoise_dir, 
+         save_dir
          ):
     #setting universal experiment params
     torch.manual_seed(seed)
@@ -70,6 +72,9 @@ def main(seed: int,
     elif experiment_name == 'experiment4c':
         types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
+    elif experiment_name == 'inference':
+        types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
+        data = dataset.SupersampleDataset(dataset_folder,types_to_load)
     elif experiment_name == 'experiment4d':
         types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
@@ -78,14 +83,18 @@ def main(seed: int,
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
     else:
         raise NotImplementedError
-    #calculating train-val split
-    train_size = int(train_percentage * len(data))
-    val_size = len(data) - train_size
-    train_set, val_set = random_split(data, [train_size, val_size])
+    
+    if experiment_name == "inference":
+        test_gen = DataLoader(data, **{'batch_size': 1, 'shuffle': False, 'num_workers': 1})
+    else:
+        #calculating train-val split
+        train_size = int(train_percentage * len(data))
+        val_size = len(data) - train_size
+        train_set, val_set = random_split(data, [train_size, val_size])
 
-    #instantiate train-val iterators
-    train_gen = DataLoader(train_set, **dataloader_params)
-    val_gen = DataLoader(val_set, **dataloader_params)
+        #instantiate train-val iterators
+        train_gen = DataLoader(train_set, **dataloader_params)
+        val_gen = DataLoader(val_set, **dataloader_params)
 
     # checkpoint folder
     chkpoint_folder = os.path.join('model_checkpoints', run_name)
@@ -116,6 +125,12 @@ def main(seed: int,
         model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 14, 'output_channel_size': 3}
         experiment4c(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
+    elif experiment_name == 'inference':
+        model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
+        'input_channel_size': 14, 'output_channel_size': 3}
+        assert chkpoint_folder.split('.')[-1] == 'pt', "haven't defined a checkpoint path"
+        assert save_dir != None, "haven't defined a directory to save the model output"
+        run4c(save_dir, device, test_gen, chkpoint_folder, model_params)
     elif experiment_name == 'experiment4d':
         model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 14, 'output_channel_size': 3}
@@ -145,6 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('--experiment_name',default='SingleImageSuperResolution',help=("decides which experiment to run"))
     parser.add_argument('--model_superres_dir',default=None,help=("path to superres model"))
     parser.add_argument('--model_denoise_dir',default=None,help=("path to denoise model"))
+    parser.add_argument('--save_dir',default=None,help=("path to save model outputs"))
     args = parser.parse_args()
     seed = int(args.seed)
     dataloader_params = {'batch_size': int(args.batch_size),
@@ -158,6 +174,7 @@ if __name__ == '__main__':
     run_name = str(args.run_name)
     model_superres_dir = str(args.model_superres_dir)
     model_denoise_dir = str(args.model_denoise_dir)
+    save_dir = str(args.save_dir)
     main(seed,
         run_name,
         writer_folder,
@@ -167,5 +184,6 @@ if __name__ == '__main__':
         train_percentage,
         experiment_name,
         model_superres_dir,
-        model_denoise_dir
+        model_denoise_dir,
+        save_dir
         )
