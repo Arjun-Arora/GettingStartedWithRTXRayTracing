@@ -165,11 +165,12 @@ def build_dataset_csv(src_folder: str):
         idx = list(value.keys())
         fh = list(value.values())
 
-        zipped_lists = zip(idx, fh)
-        sorted_zipped_lists = sorted(zipped_lists)
+        if len(idx) > 0:
+            zipped_lists = zip(idx, fh)
+            sorted_zipped_lists = sorted(zipped_lists)
 
-        sorted_list = [handle for _, handle in sorted_zipped_lists]
-        data[key] = sorted_list
+            sorted_list = [handle for _, handle in sorted_zipped_lists]
+            data[key] = sorted_list
 
     df = pd.DataFrame(data=data)
     df.to_csv(os.path.join(src_folder, "data.csv"), index=False)
