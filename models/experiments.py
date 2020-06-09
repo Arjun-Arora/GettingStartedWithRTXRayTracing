@@ -53,6 +53,11 @@ def experiment4a(writer,
     running_loss_2 = 0
     running_psnr_2 = 0
 
+    x1 = None
+    y_hat_1 = None
+    x2 = None
+    y_hat_2 = None
+    y2 = None 
     with torch.set_grad_enabled(False):
         for j, batch in enumerate(tqdm(val_gen)):
             y1 = batch['full'][:, :, :1016, :].to(device)
