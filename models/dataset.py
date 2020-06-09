@@ -161,6 +161,7 @@ def build_dataset_csv(src_folder: str):
         else:
             raise NotImplementedError
 
+    keys_to_remove = []
     for key, value in data.items():
         idx = list(value.keys())
         fh = list(value.values())
@@ -172,7 +173,10 @@ def build_dataset_csv(src_folder: str):
             sorted_list = [handle for _, handle in sorted_zipped_lists]
             data[key] = sorted_list
         else:
-            data.pop(key)
+            keys_to_remove.append(key)
+    
+    for key in keys_to_remove:
+        data.pop(key)
 
     df = pd.DataFrame(data=data)
     df.to_csv(os.path.join(src_folder, "data.csv"), index=False)
