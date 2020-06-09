@@ -35,6 +35,7 @@ def experiment4a(writer,
                                     input_channel_size=model_params['input_channel_size'],
                                     output_channel_size=model_params['output_channel_size'])
     model_2 = denoise_model.KPCN_light(input_channels=model_params['input_channel_size'], kernel_size=3)
+    apply_kernel = denoise_model.ApplyKernel(kernel_size=3).to(device)
     checkpoint_1 = torch.load(model_superres_dir)
     checkpoint_2 = torch.load(model_denoise_dir)
     model_1.load_state_dict(checkpoint_1['model_state_dict'])
