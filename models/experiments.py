@@ -24,6 +24,118 @@ def get_PSNR(model_output, target):
     PSNR = 10 * np.log10(1.0 / mse)
     return PSNR
 
+def experiment4a(writer,
+                 device,
+                 val_gen,
+                 model_superres_dir,
+                 model_denoise_dir,
+                 model_params):
+    
+    model_1 = supersample_model.ESPCN(upscale_factor=model_params['upscale_factor'],
+                                    input_channel_size=model_params['input_channel_size'],
+                                    output_channel_size=model_params['output_channel_size'])
+    model_2 = denoise_model.KPCN_light(input_channels=model_params['input_channel_size'], kernel_size=3)
+    checkpoint_1 = torch.load(model_superres_dir)
+    checkpoint_2 = torch.load(model_denoise_dir)
+    model_1.load_state_dict(checkpoint_1['model_state_dict'])
+    model_2.load_state_dict(checkpoint_2['model_state_dict'])
+
+    model_1.eval().to(device)
+    model_2.eval().to(device)
+
+    loss_criterion = torch.nn.MSELoss().to(device)
+
+    running_loss_1 = 0
+    running_psnr_1 = 0
+
+    running_loss_2 = 0
+    running_psnr_2 = 0
+
+    with torch.set_grad_enabled(False):
+        for j, batch in enumerate(val_gen):
+            y1 = batch['full'][:, :, :1016, :].to(device)
+            N,C,H,W = y1.size()
+            x1 = []
+            for p in model_params['input_types']:
+                if p == 'half':
+                    x1.append(F.interpolate(batch[p], size=(H,W)))
+                    # print(F.interpolate(batch[p], size=(H,W)).to(device).size())
+                else:
+                    x1.append(batch[p])
+            x1 = torch.cat(x1,dim=1)
+            x1 = x1.to(device)
+
+            y_hat_1 = model_1(x1)
+            loss_1  = loss_criterion(y_hat_1, y1)
+
+            running_loss_1 += loss_1.item()
+            running_psnr_1 += get_PSNR(y_hat_1, y1)
+
+            #set y_hat_1 separate from previous model
+            y_hat_1 = y_hat_1.detach()
+
+            x2 = y_hat_1
+            y2 = batch['clean'][:, :, :1016, :].to(device)
+            for p in model_params['input_types']:
+                if p != 'half':
+                    x2 = torch.cat((x2,batch[p].to(device)),dim=1)
+
+            kernel = model_2(x2)
+            y_hat_2 = apply_kernel.forward(x2[:, :3], kernel, padding=True)
+            loss_2 = loss_criterion(y_hat_2, y2)
+
+            running_loss_2 += loss_2.item()
+            running_psnr_2 += get_PSNR(y_hat_2,y2)
+
+    writer.add_scalar('Validation Loss 1', running_loss_1 / len(val_gen), global_step=0)
+    writer.add_scalar('Validation PSNR (dB) 1', running_psnr_1 / len(val_gen), global_step=0)
+
+    writer.add_scalar('Validation Loss 2', running_loss_2 / len(val_gen), global_step=0)
+    writer.add_scalar('Validation PSNR (dB) 2', running_psnr_2 / len(val_gen), global_step=0)
+
+    x1_cpu = x1.cpu()[:, :3, :, :]
+    y_hat_1cpu = y_hat_1.cpu()[:, :3, :, :]
+    y1_cpu = y1.cpu()[:, :3, :, :]
+
+    x2_cpu = x2.cpu()[:, :3, :, :]
+    y_hat_2cpu = y_hat_2.cpu()[:, :3, :, :]
+    y2_cpu = y2.cpu()[:, :3, :, :]
+
+    img_grid = torchvision.utils.make_grid(x1_cpu)
+    img_grid = viz.tensor_preprocess(img_grid)
+    
+    writer.add_image('Val Input 1', img_grid, global_step=global_step)
+
+    img_grid = torchvision.utils.make_grid(y_hat_1cpu)
+    img_grid = viz.tensor_preprocess(img_grid)
+    writer.add_image('Val Model Output 1', img_grid, global_step=global_step)
+
+    img_grid = torchvision.utils.make_grid(y1_cpu)
+    img_grid = viz.tensor_preprocess(img_grid)
+    writer.add_image('Val Ground Truth 1', img_grid, global_step=global_step)
+
+    img_grid = torchvision.utils.make_grid(y1_cpu - y_hat_1cpu)
+    img_grid = viz.tensor_preprocess(img_grid, difference=True)
+    writer.add_image('Val Difference (GT and Model Output) 1', img_grid, global_step=global_step, dataformats='HW')
+
+    #second
+    img_grid = torchvision.utils.make_grid(x2_cpu)
+    img_grid = viz.tensor_preprocess(img_grid)
+    
+    writer.add_image('Val Input 2', img_grid, global_step=global_step)
+
+    img_grid = torchvision.utils.make_grid(y_hat_2cpu)
+    img_grid = viz.tensor_preprocess(img_grid)
+    writer.add_image('Val Model Output 2', img_grid, global_step=global_step)
+
+    img_grid = torchvision.utils.make_grid(y2_cpu)
+    img_grid = viz.tensor_preprocess(img_grid)
+    writer.add_image('Val Ground Truth 2', img_grid, global_step=global_step)
+
+    img_grid = torchvision.utils.make_grid(y2_cpu - y_hat_2cpu)
+    img_grid = viz.tensor_preprocess(img_grid, difference=True)
+    writer.add_image('Val Difference (GT and Model Output) 2', img_grid, global_step=global_step, dataformats='HW')
+
 
 def experiment4b(writer,
                  device,

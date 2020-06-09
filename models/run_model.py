@@ -35,7 +35,9 @@ def main(seed: int,
          dataloader_params: dict,
          num_epochs: int,
          train_percentage: float,
-         experiment_name: str
+         experiment_name: str,
+         model_superres_dir,
+         model_denoise_dir
          ):
     #setting universal experiment params
     torch.manual_seed(seed)
@@ -57,6 +59,9 @@ def main(seed: int,
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
     elif experiment_name == 'Denoise':
         data = dataset.DenoiseDataset(dataset_folder)
+    elif experiment_name == 'experiment4a':
+        types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
+        data = dataset.SupersampleDataset(dataset_folder,types_to_load)
     elif experiment_name == 'experiment4b':
         types_to_load = ['half','mat_diffuse', 'mat_ref', 'mat_spec_rough', 'world_normal', 'world_pos', 'full','clean']
         data = dataset.SupersampleDataset(dataset_folder,types_to_load)
@@ -95,6 +100,12 @@ def main(seed: int,
         model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 14, 'output_channel_size': 3}
         SingleImageSuperResolution(writer, device, train_gen, val_gen, num_epochs, chkpoint_folder, model_params)
+    elif experiment_name == 'experiment4a':
+        model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
+        'input_channel_size': 14, 'output_channel_size': 3}
+        assert model_superres_dir != None,"model_superres_dir needs to be a path, not None"
+        assert model_denoise_dir != None,"model_denoise_dir needs to be a path, not None"
+        experiment4b(writer, device, val_gen,model_superres_dir,model_denoise_dir, model_params)
     elif experiment_name == 'experiment4b':
         model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 14, 'output_channel_size': 3}
@@ -130,6 +141,8 @@ if __name__ == '__main__':
     parser.add_argument('--dataset_folder',default='processed')
     parser.add_argument('--writer_folder',default='runs')
     parser.add_argument('--experiment_name',default='SingleImageSuperResolution',help=("decides which experiment to run"))
+    parser.add_argument('--model_superres_dir',default=None,help=("path to superres model"))
+    parser.add_argument('--model_denoise_dir',default=None,help=("path to denoise model"))
     args = parser.parse_args()
     seed = int(args.seed)
     dataloader_params = {'batch_size': int(args.batch_size),
@@ -141,6 +154,8 @@ if __name__ == '__main__':
     writer_folder=str(args.writer_folder)
     experiment_name = str(args.experiment_name)
     run_name = str(args.run_name)
+    model_superres_dir = str(args.model_superres_dir)
+    model_denoise_dir = str(args.model_denoise_dir)
     main(seed,
         run_name,
         writer_folder,
@@ -148,4 +163,7 @@ if __name__ == '__main__':
         dataloader_params,
         num_epochs,
         train_percentage,
-        experiment_name)
+        experiment_name,
+        model_superres_dir,
+        model_denoise_dir
+        )
