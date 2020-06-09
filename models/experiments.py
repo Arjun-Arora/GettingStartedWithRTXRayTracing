@@ -592,8 +592,10 @@ def experiment4d(writer,
                 torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'loss': loss.item()},
+                'optimizer_1_state_dict': optimizer_1.state_dict(),
+                'optimizer_2_state_dict': optimizer_2.state_dict(),
+                'loss_1': loss_1.item(),
+                'loss_2': loss_2.item()},
                 os.path.join(chkpoint_folder, "end_to_end_{epoch}.pt".format(epoch=epoch)))
 
             img_grid = torchvision.utils.make_grid(x_cpu)
