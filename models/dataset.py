@@ -171,6 +171,8 @@ def build_dataset_csv(src_folder: str):
 
             sorted_list = [handle for _, handle in sorted_zipped_lists]
             data[key] = sorted_list
+        else:
+            data.pop(key)
 
     df = pd.DataFrame(data=data)
     df.to_csv(os.path.join(src_folder, "data.csv"), index=False)
