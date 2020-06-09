@@ -33,7 +33,7 @@ def run4c(save_dir, device, test_gen, checkpoint_path, model_params):
     with torch.set_grad_enabled(False):
         for j, batch in enumerate(tqdm(test_gen)):
             y = batch['clean'][:, :, :1016, :].to(device)
-            y_full = batch['full'][:, :, :1016, :].to(device)
+            # y_full = batch['full'][:, :, :1016, :].to(device)
 
             N, C, H, W = y.size()
 
