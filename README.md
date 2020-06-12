@@ -48,13 +48,13 @@ So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Sin
 ### Models
 
 #### Super Resolution
-There has been a lot of work done in super resolution in the deep learning community. Models have used CNNs, ResNets, GANs, etc. However given the design principles of speed and low memory overhead, our model needed to have fast execution time and be simple. We converged on using ESPCN (Shi 3) due to small model size and the real time performance of the model. The model is able to achieve all three of our specs due to it's efficient sub-pixel convolution layer. A sub-pxiel convolution layer is a convolution with a stride of 1/r. This paper makes this convolution layer faster by exploiting some mathematical properties when the layer is periodically shuffled. The following figure is similar to the model we implemented for super resolution (Shi 3).
+Super Resolution has been a common application of deep networks for the past four years. Models have used CNNs, ResNets, GANs, etc. However given the design principles of speed and low memory overhead, our model needs to have both fast execution time and be fairly compact. For this work, we chose ESPCN  due to its small size and the fast inference capability (Shi 3). The model is able to achieve all three of our specs due to it's efficient sub-pixel convolution layer. A sub-pxiel convolution layer is a convolution with a stride of 1/r. This paper makes this convolution layer faster by exploiting some mathematical properties when the layer is periodically shuffled. The following figure is similar to the model we implemented for super resolution (Shi 3).
 
 <p align="center">
   <img src="./images/super-res.png"/>
 </p>
 
-In our experiments we would modify the input channels to experiment with various input combinations such as half-resolution and g-buffer. We would change the internal filter size to fit the budget we need to have fast execution and small model size. 
+In our experiments we would modify the input channels to experiment with various input combinations such as half-resolution and g-buffer. We changed the internal filter size to fit the budget we need to have fast execution and small model size. 
 
 <p align="center">
   <img src="./images/sr-data.png"/>
@@ -81,9 +81,11 @@ The first experiments we performed involved finding the right models for the tas
 After hitting our allocated budgets, we explored various training schemes to improve our model's performance. They included individually training the sub models, end-to-end training, and concurrent training with blocking gradients between models.
 
 ## Results
-We achieved exceeding the PSNR of 4spp with respect to 32spp and with a lower frame time budget and temporally stable results where objects don't flicker without the need for recurrence strucutre and doesn't use motion vectors. Our model has issues with ghosting, color accuracy, and low frequency noise artifacts.
 
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
+
+Overall we succeded in most of our goals for this project. Firstly, we exceeded the PSNR of 4spp with respect to 32spp by ~2x with nearly all of our final models. Moreover, our outputs had an overall lower frame time budget and were temporally stable without the need of motion vectors. However, qualitatively our results seem to need some work. For example, our model has issues with ghosting, color accuracy, and low frequency noise artifacts.
+
 
 All the experiments with relation to timing was performed on a machine with a Ryzen 3700X, 16 GB of RAM, and RTX 2070 Super.
 
@@ -94,8 +96,7 @@ We explored various architectures that used UNets, ResNets, Convolutional Autoen
 |:-:|:-:| :-: |
 | Inference Time (ms)|8.802| 8.320 |
 
-Below we see the timing results for the RTX 2070 Super for generating the data required for our models. We needed to factor these valeus since they add to the FPS cost of the overall system.
-
+Below are the timing results for the RTX 2070 Super for generating the data required for our models. These times are critical since they directly provide us with our frame-time budget for our entire model step.
 | |530x960 1 spp|1060x1920  gbuffer|1060x1920 1spp|1060x1920 4spp|1060x1920 32spp|
 |:-:|:-:|:-:|:-:| :-: | :-: | 
 | Frame-time (ms)| 2.90  | 2.2 |6.50 |26.0 | 208 |
@@ -103,7 +104,7 @@ Below we see the timing results for the RTX 2070 Super for generating the data r
 
 
 ### Improving Bandwidth/Input Size
-We wanted to explore the impact of data types on the performance of the model. So we looked at various inputs such as half image only, half image with partial g-buffer, and half image with full g-buffer. These experiments are critical to potentially reducing the amount of memory used in VRAM since most of the memory usage is for the images. Our work didn't experiment with the denoising model since the original work used the full gbuffer.
+We wanted to explore the impact of data types on the performance of the model. So we looked at various inputs such as half image only, half image with partial g-buffer, and half image with full g-buffer. These experiments are critical to potentially reducing the amount of memory used in VRAM since most of the memory usage is for the images. Our work didn't experiment with changing the inputs to the denoising model since the original work used the full gbuffer to guide the denoiser.
 
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
@@ -115,8 +116,8 @@ We wanted to explore the impact of data types on the performance of the model. S
 Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
 
-### Improving Image Quality
-We attempted to improve image quality by trying different training procedures. The first number in the PSNR columns is calculating the PSNR of the output of the super-resolution part of the network to 1080p 1spp. The second number in the column is the final output image compared to 1080p 32 spp
+### Improving Image Quality/Final Results
+For our final experiments, we attempted to improve image quality by trying different training procedures beyond simply end-to-end training. The first number in the PSNR columns is calculating the PSNR of the output of the super-resolution part of the network to 1080p 1spp. The second number in the column is the final output image compared to 1080p 32 spp
 
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
@@ -145,7 +146,7 @@ Here are the results on the val set, comparing 1spp and 4spp 1080p ray traced im
   <img src="./images/exp4a_gt.png"/>
 </p>
 
-The first row of images comes from experiment 4a and the second row is corresponding ground truth. Using these two pretrained models, we can see that the model fails to output the correct ray traced reflections and colors. However, it does reduce much of the high frequency noise from the input. Given these results we wanted to train a denoiser model that was trained on the distribution of data that came from the the super sampling model.
+The first row of images comes from experiment 4a and the second row is corresponding ground truth. Using these two pretrained models, that have not seen each other's input/output distributions we can see that the ensemble fails to output the correct ray traced reflections and colors. However, it does reduce much of the high frequency noise from the input. Given these results we wanted to train a denoiser model that was trained on the distribution of data that came from the the super sampling model.
 
 #### Experiment4b/c/d Results
 <p align="center">
@@ -160,19 +161,19 @@ The first row of images comes from experiment 4a and the second row is correspon
 
 Rows one, two, and three of the above set of images are the outputs of experiments 4b, 4c, and 4d. Row four is the ground truth for these three experiments.
 
-After training the models concurrently but not letting the gradients pass through the inputs for each sub model, we can barely see an improvement in the quality of the image. This is also reflected in the PSNR. The next obvious training scheme was to train an end-to-end model where the input was a half-res w/ gbuffer and the output was a supersampled/denoised image. Here we can see that the model is starting to learn the correct lighting of scene asn we can even see a few blobs of reflections in experiment 4c/4d. 
+After training the models concurrently but not letting the gradients pass through the inputs for each sub model, we can barely see an improvement in the quality of the image (4b). This is also reflected in the PSNR. The next obvious training scheme was to train an end-to-end model where the input was a half-res w/ gbuffer and the output was a supersampled/denoised image (4c). Here we can see that the model is starting to learn the correct lighting of scene asn we can even see a few blobs of reflections in experiment 4c. 4d is essentially experiment 4c but we also pass back gradients based on comparing the output of the ESPCN super-resolution model to 1080p 1spp. Our rationale was to add more signal on what each sub-model was supposed to accomplish. Here we can see that the highlights in the flower part are definitively more bright than that of 4c.
 
 ### Takeaways
 
 It is possible to do DLSS. It's just incredibly difficult without a lot of compute and data. Here are a few more detailed insights:
 
-* One common phenomenon that is persistent across all our images is a ghosting effect. At first we thought this might be a fault in our model but after further inspection it seems like our data preprocessing before passing it into the neural network might be stretching the color channels of the image.
+* One common phenomenon that is persistent across all our images is a ghosting effect. At first we thought this might be a fault in our model but after further inspection it seems like our data preprocessing before passing it into the neural network might be stretching the physical extent of objects in the image.
 
-* Super resolution works but the approach we took to trainig it might be flawed. It might be better to perform model distillation instead of reducing the size of the model.
+* Super resolution works but the approach we took to trainig it might be flawed. It might be better to perform model distillation instead of reducing the size of the model and training from scratch.
 
 * Generally our model does not have temporal stability issues but we do have issues in darker regions of the image such as shadows. Maybe exploring motion vectors/recurrence structure in the model could help improve the stability.
 
-* GPU is only part of the system. When we used a VM, we ran into massive slowdows with disk i/o since the storage is distributed. Quite often our compute would be left idling. In addition, system temperature can have a large impact on performance. After installing proper coooling on the machine with the 2070 Super, we saw a 25x in training speed.
+* The GPU is only part of the system. When we used a VM, we ran into massive slowdows in training due to disk i/o since the storage is distributed. Quite often our compute would be left idling while the process was focused on fetching data from disk. In addition, system temperature can have a large impact on performance. After installing proper coooling on the machine with the 2070 Super, we saw a 25x in training speed.
 
 ### References
 1. Burnes, Andrew. “NVIDIA DLSS 2.0: A Big Leap In AI Rendering.” Artificial Intelligence Computing Leadership from NVIDIA, Nvidia, 23 Mar. 2020, www.nvidia.com/en-us/geforce/news/nvidia-dlss-2-0-a-big-leap-in-ai-rendering/.
