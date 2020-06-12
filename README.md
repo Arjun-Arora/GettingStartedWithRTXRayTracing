@@ -69,7 +69,7 @@ The first experiments we performed involved finding the right models for the tas
 
 #### RTX 2070 Super
 
-| Performance Results |530x960 1 spp | 1060x1920  gbuffer|1060 x 1920 1spp |
+| Performance Results |530x960 1 spp |1060x1920  gbuffer|1060x1920 1spp |
 |:-:|:-:|:-: | :-: |
 | Frame-time (ms)| right-aligned | yes |  |
 |Frames per second|              |     |  |
@@ -78,8 +78,8 @@ As defined in our design principles our system's success is defined by the infer
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5MTQxMDQ5NzEsMTA4MTc4NzA4NywtMT
-Q1NzMwMzQ1LC0xMjg4MDEzOTYzLDE3MTgzNzE2OTMsLTM2MzM5
-MzAxNSwtNzc5MjcxMDI0LDgzMjIxMTY3LC0xNDY0NTY5MDA1XX
-0=
+eyJoaXN0b3J5IjpbMTU5MTgxNzY3MywxMDgxNzg3MDg3LC0xND
+U3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3MTY5MywtMzYzMzkz
+MDE1LC03NzkyNzEwMjQsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ
+==
 -->
