@@ -56,6 +56,10 @@ There has been a lot of work done in super resolution in the deep learning commu
 
 In our experiments we would modify the input channels to experiment with various input combinations such as half-resolution and g-buffer. We would change the internal filter size to fit the budget we need to have fast execution and small model size. 
 
+<p align="center">
+  <img src="./images/sr-data.png"/>
+</p>
+
 #### Denoise
 Enlightened by Disney's publication in 2018 [\cite], we chose to adapt the oringal KPCN, which is made for offline denoising, in out real time rendering settings. In order to denoise the input within the given amount of time (~8ms), we both reduced the number of layers and the size of predicted denoising kernel. The following figure illustrates our light version of KPCN.
 
@@ -64,6 +68,10 @@ Enlightened by Disney's publication in 2018 [\cite], we chose to adapt the oring
 </p>
 
 The input of our network is a stacked N x 14 x H x W channel input, where N is the batch size and H and W are the height and weight in full resolution. The 14 channels include the output from the super resolution network and all additional information from the g buffer used in super resolution as well. Since we can directly reuse the g buffer generated, there's little cost in getting desired input for the denoise network.
+
+<p align="center">
+  <img src="./images/denoise-data.png"/>
+</p>
 
 The network outputs a N x 9 x H x W tensor as the predicted 3 x 3 denoising kernels for each pixel. We then denoise the output from the super resolution network with these pixel-level filters.
 
