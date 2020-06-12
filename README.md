@@ -114,7 +114,7 @@ Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames
 
 
 ### Improving Image Quality
-We attempted to improve image quality by trying different training procedures.
+We attempted to improve image quality by trying different training procedures. The first number in the PSNR columns is calculating the PSNR of the output of the super-resolution part of the network to 1080p 1spp.
 
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
@@ -125,7 +125,7 @@ We attempted to improve image quality by trying different training procedures.
 
 Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
-Here are the results on the val set, comparing 1spp and 4spp 1080p ray traced images to 32 spp
+Here are the results on the val set, comparing 1spp and 4spp 1080p ray traced images to 32 spp 1080p. As you can see all of our models beat these baselines handily.
 
 #### Ray-tracing Results 
 |               | PSNR   |
