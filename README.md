@@ -48,7 +48,13 @@ So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Sin
 ### Models
 
 #### Super Resolution
-There has been a lot of work done in super resolution in the deep learning community. Models have used CNNs, ResNets, GANs, etc. However given the design principles of speed and low memory overhead, our model needed to have fast execution time and be simple. We converged on using ESPCN [\cite] due to small model size and the real time performance of the model. The model is able to achieve all three of our specs due to it's efficient sub-pixel convolution layer. A sub-pxiel convolution layer is a convolution with a stride of 1/r. This paper makes this convolution layer faster by exploiting some mathematical properties when the layer is periodically shuffled.
+There has been a lot of work done in super resolution in the deep learning community. Models have used CNNs, ResNets, GANs, etc. However given the design principles of speed and low memory overhead, our model needed to have fast execution time and be simple. We converged on using ESPCN [\cite] due to small model size and the real time performance of the model. The model is able to achieve all three of our specs due to it's efficient sub-pixel convolution layer. A sub-pxiel convolution layer is a convolution with a stride of 1/r. This paper makes this convolution layer faster by exploiting some mathematical properties when the layer is periodically shuffled. The following figure is similar to the model we implemented for super resolution [\cite].
+
+<p align="center">
+  <img src="./images/super-res.png"/>
+</p>
+
+In our experiments we would modify the input channels to experiment with various input combinations such as half-resolution and g-buffer. We would change the internal filter size to fit the budget we need to have fast execution and small model size. 
 
 #### Denoise
 Enlightened by Disney's publication in 2018 [\cite], we chose to adapt the oringal KPCN, which is made for offline denoising, in out real time rendering settings. In order to denoise the input within the given amount of time (~8ms), we both reduced the number of layers and the size of predicted denoising kernel. The following figure illustrates our light version of KPCN.
