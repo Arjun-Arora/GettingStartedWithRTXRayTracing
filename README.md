@@ -75,16 +75,40 @@ The first experiments we performed involved finding the right models for the tas
 ## Results
 
 ### RTX 2070 Super
-### Performance results
+#### ray-tracing benchmarks
 | |530x960 1 spp|1060x1920  gbuffer|1060x1920 1spp|1060x1920 4spp|1060x1920 32spp|
 |:-:|:-:|:-:|:-:| :-: | :-: | 
 | Frame-time (ms)| 2.90  | 2.2 |6.50 |26.0 | 208 |
 |Frames per second|101|125|28.1|7.25 |.906 |
 
-### Model Benchmarking
+
+
+##### Note: 
+All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
+
+
+#### Model benchmarks
 | |Super Resolution|Denoiser|
 |:-:|:-:| :-: |
 | Inference Time (ms)|8.802| 8.320 |
+#### Ray-tracing Results
+|               | PSNR   |
+|---------------|--------|
+| 1spp -> 32spp | 10.472 |
+| 4spp -> 32spp | 10.42  |
+### Model Results
+
+
+| Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
+|:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
+| Experiment 2a | 0.4513            | 10.45       | 0.4537            | 10.42       |
+| Experiment 2b | 0.04268           |       10.68 | 0.04248           | 10.71       |
+| Experiment 2c | 0.04134           | 10.85       | 0.04138           | 10.84       |
+| Experiment 3a | 8.16e-3           | 20.89       | 7.93e-3           | 21.04       |
+| Experiment 4a | N/A               | N/A         | N/A               | 17.43       |
+| Experiment 4b | 0.4066/0.0149     | 10.9/18.27  | 0.0415/0.0154     | 10.82/18.15 |
+| Experiment 4c | 6.9275e-3         | 10.43/21.65 | 6.5194e-3         | 10.34/21.9  |
+| Experiment 4d | 0.08276/8.2073e-3 | 10.84/20.89 | 0.08455/7.8941e-3 | 10.74/21.05 |
 
 
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
@@ -92,8 +116,8 @@ As defined in our design principles our system's success is defined by the infer
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwODMxNTE5NDIsMTA4MTc4NzA4NywtMT
-Q1NzMwMzQ1LC0xMjg4MDEzOTYzLDE3MTgzNzE2OTMsLTM2MzM5
-MzAxNSwtNzc5MjcxMDI0LDgzMjIxMTY3LC0xNDY0NTY5MDA1XX
-0=
+eyJoaXN0b3J5IjpbMTE3NjQzNDM3OCwxOTcyODc3NDg4LC0xMD
+gzMTUxOTQyLDEwODE3ODcwODcsLTE0NTczMDM0NSwtMTI4ODAx
+Mzk2MywxNzE4MzcxNjkzLC0zNjMzOTMwMTUsLTc3OTI3MTAyNC
+w4MzIyMTE2NywtMTQ2NDU2OTAwNV19
 -->
