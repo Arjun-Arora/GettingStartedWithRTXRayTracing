@@ -85,7 +85,7 @@ We achieved exceeding the PSNR of 4spp with respect to 32spp and with a lower fr
 
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
-All the experiments with relation to timing was performed on a Ryzen 3700X, 16 GB of RAM, and RTX 2070 Super.
+All the experiments with relation to timing was performed on a machine with a Ryzen 3700X, 16 GB of RAM, and RTX 2070 Super.
 
 ### Model Exploration/Improving Speed
 We explored various architectures that used UNets, ResNets, Convolutional Autoencoders, etc. and finally settled on the two models described above. We timed the various models and model parameters until we converged to a configuration that fit in our budget. Below we see the timings for a given frame at fp16. The fp32 versions of these models run at a 25% performance cost in time. 
