@@ -125,6 +125,15 @@ We attempted to improve image quality by trying different training procedures.
 
 Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
+Here are the results on the val set, comparing 1spp and 4spp 1080p ray traced images to 32 spp
+
+#### Ray-tracing Results 
+|               | PSNR   |
+|---------------|--------|
+| 1spp -> 32spp | 10.472 |
+| 4spp -> 32spp | 10.42  |
+
+
 #### Experiment4a Results
 <p align="center">
   <img src="./images/exp4a.png"/>
@@ -164,10 +173,3 @@ It is possible to do DLSS. It's just incredibly difficult without a lot of compu
 * GPU is only part of the system. When we used a VM, we ran into massive slowdows with disk i/o since the storage is distributed. Quite often our compute would be left idling. In addition, system temperature can have a large impact on performance. After installing proper coooling on the machine with the 2070 Super, we saw a 25x in training speed.
 
 
-### Model Results
-
-#### Ray-tracing Results
-|               | PSNR   |
-|---------------|--------|
-| 1spp -> 32spp | 10.472 |
-| 4spp -> 32spp | 10.42  |
