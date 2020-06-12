@@ -85,7 +85,7 @@ All PSNR/loss is calculated against 1080p 32 spp ray-traced frames
 | |Super Resolution|Denoiser|
 |:-:|:-:| :-: |
 | Inference Time (ms)|8.802| 8.320 |
-### Ray-tracing Results
+#### Ray-tracing Results
 |               | PSNR   |
 |---------------|--------|
 | 1spp -> 32spp | 10.472 |
@@ -110,7 +110,7 @@ As defined in our design principles our system's success is defined by the infer
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTE0MzE5MjkwOSwxOTcyODc3NDg4LC0xMD
+eyJoaXN0b3J5IjpbMTE3NjQzNDM3OCwxOTcyODc3NDg4LC0xMD
 gzMTUxOTQyLDEwODE3ODcwODcsLTE0NTczMDM0NSwtMTI4ODAx
 Mzk2MywxNzE4MzcxNjkzLC0zNjMzOTMwMTUsLTc3OTI3MTAyNC
 w4MzIyMTE2NywtMTQ2NDU2OTAwNV19
