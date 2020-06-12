@@ -48,7 +48,7 @@ So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Sin
 ### Models
 
 #### Super Resolution
-There has been a lot of work done in super resolution in the deep learning community. Models have used CNNs, ResNets, GANs, etc. However given the design principles of speed and low memory overhead, our model needed to have fast execution time and be simple. We converged on using ESPCN [\cite] due to small model size and the real time performance of the model. The model is able to achieve all three of our specs due to it's efficient sub-pixel convolution layer. A sub-pxiel convolution layer is a convolution with a stride of 1/r. This paper makes this convolution layer faster by exploiting some mathematical properties when the layer is periodically shuffled. The following figure is similar to the model we implemented for super resolution [\cite].
+There has been a lot of work done in super resolution in the deep learning community. Models have used CNNs, ResNets, GANs, etc. However given the design principles of speed and low memory overhead, our model needed to have fast execution time and be simple. We converged on using ESPCN (Bako 1) due to small model size and the real time performance of the model. The model is able to achieve all three of our specs due to it's efficient sub-pixel convolution layer. A sub-pxiel convolution layer is a convolution with a stride of 1/r. This paper makes this convolution layer faster by exploiting some mathematical properties when the layer is periodically shuffled. The following figure is similar to the model we implemented for super resolution [\cite].
 
 <p align="center">
   <img src="./images/super-res.png"/>
@@ -176,3 +176,4 @@ It is possible to do DLSS. It's just incredibly difficult without a lot of compu
 
 ### References
 1. Burnes, Andrew. “NVIDIA DLSS 2.0: A Big Leap In AI Rendering.” Artificial Intelligence Computing Leadership from NVIDIA, Nvidia, 23 Mar. 2020, www.nvidia.com/en-us/geforce/news/nvidia-dlss-2-0-a-big-leap-in-ai-rendering/.
+2. Bako, Steve, et al. "Kernel-predicting convolutional networks for denoising Monte Carlo renderings." ACM Trans. Graph. 36.4 (2017): 97-1
