@@ -125,6 +125,25 @@ We attempted to improve image quality by trying different training procedures.
 
 Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
+#### Experiment4a Results
+<p align="center">
+  <img src="./images/experiment4a.png"/>
+</p>
+
+#### Experiment4b Results
+<p align="center">
+  <img src="./images/experiment4b.png"/>
+</p>
+
+#### Experiment4c Results
+<p align="center">
+  <img src="./images/experiment4c.png"/>
+</p>
+
+#### Experiment4d Results
+<p align="center">
+  <img src="./images/experiment4d.png"/>
+</p>
 
 ### Model Results
 
