@@ -6,7 +6,7 @@ Real time raytracing has become a killer feature of many AAA game releases. With
 
 This is the approach essentially touted by Nvidia's DLSS system (CITATION HERE). For this project we seek to create a system that can similarly perform upsampling and denoising for a ray-traced image for use in real time applications. 
 
-To achieve the goal of real-time performance, our upscaling and denoising system must meet a certain frame-time constraint. To make our lives a bit ea
+To achieve the goal of real-time performance, our upscaling and denoising system must meet a certain frame-time constraint. To make our lives a bit easier, we define a "real time"  performance to be a system that can go from a ray-trace call to final output in at least 33 ms (30 frames per second). However, we also want our model to produce somewhat accurate results, so we also constrain our model to have 
 
 ## Approach
 ## Results
@@ -14,6 +14,6 @@ To achieve the goal of real-time performance, our upscaling and denoising system
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTA5NTcxNzI3Nyw4MzIyMTE2NywtMTQ2ND
-U2OTAwNV19
+eyJoaXN0b3J5IjpbMjY2MTg5OTc2LDgzMjIxMTY3LC0xNDY0NT
+Y5MDA1XX0=
 -->
