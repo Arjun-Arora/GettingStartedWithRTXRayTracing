@@ -15,13 +15,13 @@ Our inputs to our system are
 2. A 1080p G-buffer containing world space position, world space normal, albedo, index of refraction, and specular roughness.
 
 
-The output of our system should be a single high quality 1080p ray traced image per input frame
+The output of our system should be a single high quality 1080p ray traced image per input frame.
 ## Approach
 ## Results
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTQ3MjY2ODU5OCw4MzIyMTE2NywtMTQ2ND
-U2OTAwNV19
+eyJoaXN0b3J5IjpbODEzMjA2MjI0LDgzMjIxMTY3LC0xNDY0NT
+Y5MDA1XX0=
 -->
