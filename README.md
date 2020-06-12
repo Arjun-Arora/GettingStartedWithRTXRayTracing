@@ -61,6 +61,8 @@ The input of our network is a stacked N x 14 x H x W channel input, where N is t
 The network outputs a N x 9 x H x W tensor as the predicted 3 x 3 denoising kernels for each pixel. We then denoise the output from the super resolution network with these pixel-level filters.
 ## Results
 
+
+
 The design principles
 
 <p align="center">
@@ -72,7 +74,8 @@ The design principles
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTA4MTc4NzA4NywtMTQ1NzMwMzQ1LC0xMj
-g4MDEzOTYzLDE3MTgzNzE2OTMsLTM2MzM5MzAxNSwtNzc5Mjcx
-MDI0LDgzMjIxMTY3LC0xNDY0NTY5MDA1XX0=
+eyJoaXN0b3J5IjpbMTQxMjM0ODY2NCwxMDgxNzg3MDg3LC0xND
+U3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3MTY5MywtMzYzMzkz
+MDE1LC03NzkyNzEwMjQsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ
+==
 -->
