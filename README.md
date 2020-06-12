@@ -106,7 +106,7 @@ We wanted to explore the impact of data types on the performance of the model. S
 | Experiment 2a (Half Image Input) | 0.4513            | 10.45       | 0.4537            | 10.42       |
 | Experiment 2b (G Buffer Input)| 0.04268           | 10.68       | 0.04248           | 10.71       |
 | Experiment 2c (Half Image + G Buffer Input)| 0.04134           | 10.85       | 0.04138           | 10.84       |
-| Experiment 3a (Half Image + G Buffer Input))| 8.16e-3           | 20.89       | 7.93e-3           | 21.04       |
+| Experiment 3a (Full Image + G Buffer Input))| 8.16e-3           | 20.89       | 7.93e-3           | 21.04       |
 
 Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
