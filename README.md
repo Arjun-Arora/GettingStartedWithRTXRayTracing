@@ -81,6 +81,8 @@ The first experiments we performed involved finding the right models for the tas
 After hitting our allocated budgets, we explored various training schemes to improve our model's performance. They included individually training the sub models, end-to-end training, and concurrent training with blocking gradients between models.
 
 ## Results
+We achieved exceeding the PSNR of 4spp with respect to 32spp and with a lower frame time budget and temporally stable results where objects don't flicker without the need for recurrence strucutre and doesn't use motion vectors. Our model has issues with ghosting, color accuracy, and low frequency noise artifacts.
+
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
 ### Model Exploration/Improving Speed
