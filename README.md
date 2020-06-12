@@ -127,22 +127,22 @@ Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames
 
 #### Experiment4a Results
 <p align="center">
-  <img src="./images/experiment4a.png"/>
+  <img src="./images/exp4a.png"/>
 </p>
 
 #### Experiment4b Results
 <p align="center">
-  <img src="./images/experiment4b.png"/>
+  <img src="./images/exp4b.png"/>
 </p>
 
 #### Experiment4c Results
 <p align="center">
-  <img src="./images/experiment4c.png"/>
+  <img src="./images/exp4c.png"/>
 </p>
 
 #### Experiment4d Results
 <p align="center">
-  <img src="./images/experiment4d.png"/>
+  <img src="./images/exp4d.png"/>
 </p>
 
 ### Model Results
