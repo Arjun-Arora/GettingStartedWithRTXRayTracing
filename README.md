@@ -27,12 +27,16 @@ We gathered 1000 data-points for our train and val set and another 150 data-poin
 1. 540p   1spp ray-traced frame (3 channels)
 2. 1080p 1spp ray-traced frame (3 channels)
 3. 1080p 4spp ray-traced frame (3 channels)
+4. 1080p 32 spp ray-traced frame (3 channels)
+5. 1080p g-buffer (11 channels)
+
+So in total we gather 20 channels of 1080p data 
 
 ## Results
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNTM2NzcyNzUzLC0zNjMzOTMwMTUsLTc3OT
+eyJoaXN0b3J5IjpbMzg1NjUxODU4LC0zNjMzOTMwMTUsLTc3OT
 I3MTAyNCw4MzIyMTE2NywtMTQ2NDU2OTAwNV19
 -->
