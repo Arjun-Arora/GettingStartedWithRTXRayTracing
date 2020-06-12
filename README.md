@@ -24,6 +24,8 @@ The output of our system should be a single high quality (compared to a 32 spp r
 
 For our dataset, we chose a single example scene from Falcor called "pink room" as our test set. We chose Falcor as our data generation engine since it is quite easy to use and we could easily integrate our data collection code with the extensive tutorials provided by Chris Wyman. We based our scene code off tutorial 14 of his "Getting Started with RTX Ray Tracing" series which incorporates: light probe based gbuffers, area lights, GGX environment maps, and simple tone-mapping. Also Falcor's ray-tracing API is entirely built off of the DirectX 12 API which allowed us to use the RTX cores available on our development GPU and accurately calculate frame-time performance for various shader passes.
 
+To capture the dataset, we built on top of the existing api to do create a single button interface to capture the 23 channels of data we needed for each training point, dumped to .exr files
+
 
 Since the goal of our system is to test the performance and quality of our model, not necessarily generalizability, we gathered our data from this single room.
 The views we used for our train and validation dataset come from a single animated camera path. We did randomly shuffle the data points captured to ensure generalizability across different views of the scene. Moreover, our test set comes from an entirely different animated camera path (though it is used mostly for qualitative analysis). 
@@ -42,7 +44,7 @@ So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Sin
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyODgwMTM5NjMsMTcxODM3MTY5MywtMz
-YzMzkzMDE1LC03NzkyNzEwMjQsODMyMjExNjcsLTE0NjQ1Njkw
-MDVdfQ==
+eyJoaXN0b3J5IjpbLTE0NTczMDM0NSwtMTI4ODAxMzk2MywxNz
+E4MzcxNjkzLC0zNjMzOTMwMTUsLTc3OTI3MTAyNCw4MzIyMTE2
+NywtMTQ2NDU2OTAwNV19
 -->
