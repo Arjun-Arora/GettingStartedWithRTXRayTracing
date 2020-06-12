@@ -14,20 +14,24 @@ To achieve the goal of real-time performance, our upscaling and denoising system
 
 What this means concretely is that our system must have a PSNR greater than or equal to a 4spp ray-traced image in our validation dataset and be able to infer this result within 26 ms (the performance target of 4spp). This translates to an approximate ~22 ms of model inference budget.
 
-Our inputs to our system are 
+Our inputs to our system are:
 1. A 540p 1spp ray traced image
 2. A 1080p G-buffer containing world space position, world space normal, albedo, index of refraction, and specular roughness.
 
-
 The output of our system should be a single high quality (compared to a 32 spp ray-traced frame) 1080p ray traced image per input frame.
+
 ## Approach
+
+Our design principles for our system:
+1. Performant: We need the system to run at minimum 30 fps in order to achieve 
+2. Clean: Attempt to achieve 32spp level quality.
+3. Low Memory Consumption: Our model should be able to fit on a commercial GPU along with the image & gbuffer.
 
 ### Dataset
 
 For our dataset, we chose a single example scene from Falcor called "pink room" as our test set. We chose Falcor as our data generation engine since it is quite easy to use and we could easily integrate our data collection code with the extensive tutorials provided by Chris Wyman. We based our scene code off tutorial 14 of his "Getting Started with RTX Ray Tracing" series which incorporates: light probe based gbuffers, area lights, GGX environment maps, and simple tone-mapping. Also Falcor's ray-tracing API is entirely built off of the DirectX 12 API which allowed us to use the RTX cores available on our development GPU and accurately calculate frame-time performance for various shader passes.
 
 To capture the dataset, we built on top of the existing api to do create a single button interface to capture the 23 channels of data we needed for each training point, dumped to .exr files.
-
 
 Since the goal of our system is to test the performance and quality of our model, not necessarily generalizability, we gathered our data from this single room.
 The views we used for our train and validation dataset come from a single animated camera path. We did randomly shuffle the data points captured to ensure generalizability across different views of the scene. Moreover, our test set comes from an entirely different animated camera path (though it is used mostly for qualitative analysis). 
@@ -57,6 +61,14 @@ The input of our network is a stacked N x 14 x H x W channel input, where N is t
 The network outputs a N x 9 x H x W tensor as the predicted 3 x 3 denoising kernels for each pixel. We then denoise the output from the super resolution network with these pixel-level filters.
 ## Results
 
+The design principles
+
+<p align="center">
+  <img src="./images/exp4a.png"/>
+  <img src="./images/exp4b.png"/>
+  <img src="./images/exp4c.png"/>
+  <img src="./images/exp4d.png"/>
+</p>
 
 
 <!--stackedit_data:
