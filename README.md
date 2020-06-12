@@ -2,7 +2,7 @@
 
 ## Background
 
-Real time raytracing has 
+Real time raytracing has become a killer feature of many AAA game releases. Up until recently, there haven't been the necessary hardware accelerators 
 
 ## Approach
 ## Results
@@ -10,6 +10,6 @@ Real time raytracing has
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE4MDM0MTU1MzgsODMyMjExNjcsLTE0Nj
+eyJoaXN0b3J5IjpbLTE1MDg5ODkyNTYsODMyMjExNjcsLTE0Nj
 Q1NjkwMDVdfQ==
 -->
