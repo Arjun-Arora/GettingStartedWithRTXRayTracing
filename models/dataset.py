@@ -78,15 +78,7 @@ class SupersampleDataset(Dataset):
 
 
 class DenoiseDataset(Dataset):
-<<<<<<< HEAD
-<<<<<<< HEAD
-    def __init__(self, src_folder: str, crop_size=256, log_trans=True):
-=======
-    def __init__(self, src_folder: str, crop_size=256, gamma_trans=true):
->>>>>>> e7fd05b... gamma trans by default
-=======
     def __init__(self, src_folder: str, crop_size=256, gamma_trans=True):
->>>>>>> eebd4f7... fix: boolean case
         csv_path = os.path.join(src_folder, "data.csv")
         if not os.path.exists(os.path.join(src_folder, "data.csv")):
             build_dataset_csv(src_folder)
