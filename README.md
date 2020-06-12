@@ -21,7 +21,7 @@ The output of our system should be a single high quality (compared to a 32 spp r
 ## Approach
 
 ### Dataset
-For our dataset, we chose a single example scene from Falcor called "pink room" as our test set. We chose Falcor as our data generation engine since it is quite easy to use and we could easily integrate our data collection code with the extensive tutorials provided by Chris Wyman. We based our scene code off tutorial 14 of his "Getting Started with RTX Ray Tracing" series which incorporates: diffuse global ill, lights, environment maps,
+For our dataset, we chose a single example scene from Falcor called "pink room" as our test set. We chose Falcor as our data generation engine since it is quite easy to use and we could easily integrate our data collection code with the extensive tutorials provided by Chris Wyman. We based our scene code off tutorial 14 of his "Getting Started with RTX Ray Tracing" series which incorporates: area lights, GGX environment maps, thi
 
 
 Since the goal of our system is to test the performance and quality of our model, not necessarily generalizability, we gathered our data from this single room.
@@ -41,7 +41,7 @@ So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Sin
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTgzODE4NTUwMSwxNzE4MzcxNjkzLC0zNj
+eyJoaXN0b3J5IjpbLTEzODg5NjI4OSwxNzE4MzcxNjkzLC0zNj
 MzOTMwMTUsLTc3OTI3MTAyNCw4MzIyMTE2NywtMTQ2NDU2OTAw
 NV19
 -->
