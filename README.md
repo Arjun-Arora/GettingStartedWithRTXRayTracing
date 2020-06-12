@@ -1,6 +1,8 @@
 # DLSS In 3 Weekends
 
-![](./images/teaser-git.gif)
+<p align="center">
+  <img src="./images/teaser-git.gif"/>
+</p>
 
 ## Background
 
@@ -46,7 +48,9 @@ So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Sin
 #### Denoise
 Enlightened by Disney's publication in 2018 [\cite], we chose to adapt the oringal KPCN, which is made for offline denoising, in out real time rendering settings. In order to denoise the input within the given amount of time (~8ms), we both reduced the number of layers and the size of predicted denoising kernel. The following figure illustrates our light version of KPCN.
 
-![](./images/denoise.jpg)
+<p align="center">
+  <img src="./images/denoise.jpg"/>
+</p>
 
 The input of our network is a stacked N x 14 x H x W channel input, where N is the batch size and H and W are the height and weight in full resolution. The 14 channels include the output from the super resolution network and all additional information from the g buffer used in super resolution as well. Since we can directly reuse the g buffer generated, there's little cost in getting desired input for the denoise network.
 
