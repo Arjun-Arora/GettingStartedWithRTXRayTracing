@@ -43,6 +43,10 @@ We gathered 1000 data-points for our train and val set and another 150 data-poin
 4. 1080p 32 spp ray-traced frame (3 channels)
 5. 1080p g-buffer (11 channels)
 
+<p align="center">
+  <img src="./images/gbuffer.png"/>
+</p>
+
 So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Since we capture each feature map in a 16bit .exr for training, this came out to ~180 gb of train/val data. Our test dataset is compressed and only 150 data-points so it is a bit smaller, ~3.5 gb.
 
 ### Models
