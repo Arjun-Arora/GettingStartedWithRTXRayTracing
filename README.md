@@ -10,13 +10,15 @@ To achieve the goal of real-time performance, our upscaling and denoising system
 
 What this means concretely is that our model must have a PSNR greater than or equal to a 4spp ray-traced image in our validation dataset.
 
-
+Our inputs to our system are 
+1. A 540p 1spp ray traced image
+2. A 1080p G-buffer containing world space position, world space normal, albedo, index of refraction, and specular roughness. 
 ## Approach
 ## Results
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTgyMzg1MjUzNSw4MzIyMTE2NywtMTQ2ND
+eyJoaXN0b3J5IjpbMTU5NTY1MjQ5Miw4MzIyMTE2NywtMTQ2ND
 U2OTAwNV19
 -->
