@@ -59,23 +59,19 @@ Enlightened by Disney's publication in 2018 [\cite], we chose to adapt the oring
 The input of our network is a stacked N x 14 x H x W channel input, where N is the batch size and H and W are the height and weight in full resolution. The 14 channels include the output from the super resolution network and all additional information from the g buffer used in super resolution as well. Since we can directly reuse the g buffer generated, there's little cost in getting desired input for the denoise network.
 
 The network outputs a N x 9 x H x W tensor as the predicted 3 x 3 denoising kernels for each pixel. We then denoise the output from the super resolution network with these pixel-level filters.
+
+### Integration
+Story: First find good models, tweak the models so that they fit in the time and memory consumption budgets (const. we wanted to run the model on the full image), improve image quality using different training procedures
+
+The first experiments we performed involved finding the right models for the tasks. We ran multiple experiments and tried to find models that yielded good inference time and a low memory consumption.  
+
 ## Results
+As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
-
-
-The design principles
-
-<p align="center">
-  <img src="./images/exp4a.png"/>
-  <img src="./images/exp4b.png"/>
-  <img src="./images/exp4c.png"/>
-  <img src="./images/exp4d.png"/>
-</p>
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTQxMjM0ODY2NCwxMDgxNzg3MDg3LC0xND
-U3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3MTY5MywtMzYzMzkz
-MDE1LC03NzkyNzEwMjQsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ
-==
+eyJoaXN0b3J5IjpbMTA4MTc4NzA4NywtMTQ1NzMwMzQ1LC0xMj
+g4MDEzOTYzLDE3MTgzNzE2OTMsLTM2MzM5MzAxNSwtNzc5Mjcx
+MDI0LDgzMjIxMTY3LC0xNDY0NTY5MDA1XX0=
 -->
