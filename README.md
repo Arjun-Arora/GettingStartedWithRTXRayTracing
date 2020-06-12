@@ -4,7 +4,9 @@
 
 Real time raytracing has become a killer feature of many AAA game releases. With the advancement in deep-learning architectures, there has been a push to use machine learning to help accelerate the raytracing process in a variety of methods from sample prediction to image space denoising. One of the proposed solutions to this problem is to perform ray-tracing at a low resolution and low sample count, apply some learned upsampling technique to reach the desired resolution, and then apply a denoising filter to clean up the noise from the stochastic samples.
 
-This is the approach essentially touted by Nvidia's DLSS system (CITATION HERE). For this project we seek to create a system that can perform  
+This is the approach essentially touted by Nvidia's DLSS system (CITATION HERE). For this project we seek to create a system that can similarly perform upsampling and denoising for a ray-traced image for use in real time applications. 
+
+To achieve the goal of real-time performance, our upscaling and denoising system must meet a certain frame-time constraint. To make our lives a bit ea
 
 ## Approach
 ## Results
@@ -12,6 +14,6 @@ This is the approach essentially touted by Nvidia's DLSS system (CITATION HERE).
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTczMjcwMzI2LDgzMjIxMTY3LC0xNDY0NT
-Y5MDA1XX0=
+eyJoaXN0b3J5IjpbMTA5NTcxNzI3Nyw4MzIyMTE2NywtMTQ2ND
+U2OTAwNV19
 -->
