@@ -68,9 +68,9 @@ The input of our network is a stacked N x 14 x H x W channel input, where N is t
 The network outputs a N x 9 x H x W tensor as the predicted 3 x 3 denoising kernels for each pixel. We then denoise the output from the super resolution network with these pixel-level filters.
 
 ### Integration
-Story: First find good models, tweak the models so that they fit in the time and memory consumption budgets (const. we wanted to run the model on the full image), improve image quality using different training procedures
+The first experiments we performed involved finding the right models for the tasks. We ran multiple experiments and tried to find models that yielded good inference time and a low memory consumption. One of the constraints we worked with was ensuring that we could load the full resolution gbuffer and half res image into memory alongside the model without going outside of 8 GB of memory. We performed additional tests for profiling the models and using fp16 for training/inference. Given that the new line of GPUs from NVIDIA have Tensor Cores, we hoped to leverage their speed for some speed gains.
 
-The first experiments we performed involved finding the right models for the tasks. We ran multiple experiments and tried to find models that yielded good inference time and a low memory consumption.  
+After hitting our allocated budgets, we explored various training schemes to improve our model's performance. They included individually training the sub models, end-to-end training, and concurrent training with blocking gradients between models.
 
 ## Results
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
