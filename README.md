@@ -134,6 +134,8 @@ Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames
   <img src="./images/exp4a_gt.png"/>
 </p>
 
+The first row of images comes from experiment 4a and the second row is corresponding ground truth. Using these two pretrained models, we can see that the model fails to output the correct ray traced reflections and colors. However, it does reduce much of the high frequency noise from the input. Given these results we wanted to train a denoiser model that was trained on the distribution of data that came from the the super sampling model.
+
 #### Experiment4b/c/d Results
 <p align="center">
   <img src="./images/exp4b.png"/>
@@ -145,6 +147,23 @@ Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames
   <img src="./images/exp4bcd_gt.png"/>
 </p>
 
+Rows one, two, and three of the above set of images are the outputs of experiments 4b, 4c, and 4d. Row four is the ground truth for these three experiments.
+
+After training the models concurrently but not letting the gradients pass through the inputs for each sub model, we can barely see an improvement in the quality of the image. This is also reflected in the PSNR. The next obvious training scheme was to train an end-to-end model where the input was a half-res w/ gbuffer and the output was a supersampled/denoised image. Here we can see that the model is starting to learn the correct lighting of scene asn we can even see a few blobs of reflections in experiment 4c/4d. 
+
+### Takeaways
+
+It is possible to do DLSS. It's just incredibly difficult without a lot of compute and data. Here are a few more detailed insights:
+
+* One common phenomenon that is persistent across all our images is a ghosting effect. At first we thought this might be a fault in our model but after further inspection it seems like our data preprocessing before passing it into the neural network might be stretching the color channels of the image.
+
+* Super resolution works but the approach we took to trainig it might be flawed. It might be better to perform model distillation instead of reducing the size of the model.
+
+* Generally our model does not have temporal stability issues but we do have issues in darker regions of the image such as shadows. Maybe exploring motion vectors/recurrence structure in the model could help improve the stability.
+
+* GPU is only part of the system. When we used a VM, we ran into massive slowdows with disk i/o since the storage is distributed. Quite often our compute would be left idling. In addition, system temperature can have a large impact on performance. After installing proper coooling on the machine with the 2070 Super, we saw a 25x in training speed.
+
+
 ### Model Results
 
 #### Ray-tracing Results
@@ -152,13 +171,3 @@ Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames
 |---------------|--------|
 | 1spp -> 32spp | 10.472 |
 | 4spp -> 32spp | 10.42  |
-
-
-
-
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbMTE3NjQzNDM3OCwxOTcyODc3NDg4LC0xMD
-gzMTUxOTQyLDEwODE3ODcwODcsLTE0NTczMDM0NSwtMTI4ODAx
-Mzk2MywxNzE4MzcxNjkzLC0zNjMzOTMwMTUsLTc3OTI3MTAyNC
-w4MzIyMTE2NywtMTQ2NDU2OTAwNV19
--->
