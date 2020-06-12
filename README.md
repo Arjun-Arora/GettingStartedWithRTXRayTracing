@@ -21,8 +21,10 @@ The output of our system should be a single high quality (compared to a 32 spp r
 ## Approach
 
 ### Dataset
-For our dataset, we chose a single example scene from Falcor called "pink room" as our test set. Since the goal of our system is to test the performance and quality of our model, not necessarily generalizability, we gathered our data from this single room.
+For our dataset, we chose a single example scene from Falcor called "pink room" as our test set. We chose Falcor as our data generation engine since it is quite easy to use and we could easily integrate our data collection code with the extensive tutorials provided 
 
+
+Since the goal of our system is to test the performance and quality of our model, not necessarily generalizability, we gathered our data from this single room.
 The views we used for our train and validation dataset come from a single animated camera path. We did randomly shuffle the data points captured to ensure generalizability across different views of the scene. Moreover, our test set comes from an entirely different animated camera path (though it is used mostly for qualitative analysis). 
 
 We gathered 1000 data-points for our train and val set and another 150 data-points for our test. Per data-point we gather quite a deal of information.
@@ -39,6 +41,7 @@ So in total we gather 20 channels of 1080p data and 3 channels of 540p data. Sin
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTcxODM3MTY5MywtMzYzMzkzMDE1LC03Nz
-kyNzEwMjQsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ==
+eyJoaXN0b3J5IjpbLTczNDExMDkzOSwxNzE4MzcxNjkzLC0zNj
+MzOTMwMTUsLTc3OTI3MTAyNCw4MzIyMTE2NywtMTQ2NDU2OTAw
+NV19
 -->
