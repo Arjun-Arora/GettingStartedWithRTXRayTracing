@@ -103,10 +103,10 @@ We wanted to explore the impact of data types on the performance of the model. S
 
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
-| Experiment 2a | 0.4513            | 10.45       | 0.4537            | 10.42       |
-| Experiment 2b | 0.04268           | 10.68       | 0.04248           | 10.71       |
-| Experiment 2c | 0.04134           | 10.85       | 0.04138           | 10.84       |
-| Experiment 3a | 8.16e-3           | 20.89       | 7.93e-3           | 21.04       |
+| Experiment 2a (Half Image Input) | 0.4513            | 10.45       | 0.4537            | 10.42       |
+| Experiment 2b (G Buffer Input)| 0.04268           | 10.68       | 0.04248           | 10.71       |
+| Experiment 2c (Half Image + G Buffer Input)| 0.04134           | 10.85       | 0.04138           | 10.84       |
+| Experiment 3a (Half Image + G Buffer Input))| 8.16e-3           | 20.89       | 7.93e-3           | 21.04       |
 
 Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
@@ -116,10 +116,10 @@ We attempted to improve image quality by trying different training procedures.
 
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
-| Experiment 4a | N/A               | N/A         | N/A               | 17.43       |
-| Experiment 4b | 0.4066/0.0149     | 10.9/18.27  | 0.0415/0.0154     | 10.82/18.15 |
-| Experiment 4c | 6.9275e-3         | 10.43/21.65 | 6.5194e-3         | 10.34/21.9  |
-| Experiment 4d | 0.08276/8.2073e-3 | 10.84/20.89 | 0.08455/7.8941e-3 | 10.74/21.05 |
+| Experiment 4a (Pre Trained from 2c, 3a) | N/A               | N/A         | N/A               | 17.43       |
+| Experiment 4b (Concurrent Training, No Grad Flow @ Inputs)| 0.4066/0.0149     | 10.9/18.27  | 0.0415/0.0154     | 10.82/18.15 |
+| Experiment 4c (End-to-End Training)| 6.9275e-3         | 10.43/21.65 | 6.5194e-3         | 10.34/21.9  |
+| Experiment 4d (End-to-End Training (2 Heads))| 0.08276/8.2073e-3 | 10.84/20.89 | 0.08455/7.8941e-3 | 10.74/21.05 |
 
 Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
