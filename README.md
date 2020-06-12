@@ -67,17 +67,18 @@ The first experiments we performed involved finding the right models for the tas
 
 ## Results
 
-| Performance Results | Column 2 | Column 3 |
-|:--------:|:-------------:|:-----: |
+#### RTX 2070 Super
+| Performance Results |530 x 960 1 spp | Column 3 |
+|:-:|:-:|:-: |
 | Frame-time (ms)| right-aligned | yes | 
-|Frames per second         |               |     |
+|Frames per second|              |     |
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTI2OTY2NzkzMiwxMDgxNzg3MDg3LC0xND
-U3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3MTY5MywtMzYzMzkz
-MDE1LC03NzkyNzEwMjQsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ
-==
+eyJoaXN0b3J5IjpbLTE5MjgwMDg1MzgsMTA4MTc4NzA4NywtMT
+Q1NzMwMzQ1LC0xMjg4MDEzOTYzLDE3MTgzNzE2OTMsLTM2MzM5
+MzAxNSwtNzc5MjcxMDI0LDgzMjIxMTY3LC0xNDY0NTY5MDA1XX
+0=
 -->
