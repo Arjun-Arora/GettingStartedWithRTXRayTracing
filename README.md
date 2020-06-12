@@ -77,7 +77,7 @@ The first experiments we performed involved finding the right models for the tas
 ### Model Benchmarking
 | |Super Resolution|Denoiser|
 |:-:|:-:| :-: |
-| Inference Time (ms)| 2.90 | 2.2 |
+| Inference Time (ms)|8.802| 8.320 |
 
 
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
@@ -85,7 +85,8 @@ As defined in our design principles our system's success is defined by the infer
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbODMxMTgwNTU2LDEwODE3ODcwODcsLTE0NT
-czMDM0NSwtMTI4ODAxMzk2MywxNzE4MzcxNjkzLC0zNjMzOTMw
-MTUsLTc3OTI3MTAyNCw4MzIyMTE2NywtMTQ2NDU2OTAwNV19
+eyJoaXN0b3J5IjpbLTEwODMxNTE5NDIsMTA4MTc4NzA4NywtMT
+Q1NzMwMzQ1LC0xMjg4MDEzOTYzLDE3MTgzNzE2OTMsLTM2MzM5
+MzAxNSwtNzc5MjcxMDI0LDgzMjIxMTY3LC0xNDY0NTY5MDA1XX
+0=
 -->
