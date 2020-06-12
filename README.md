@@ -15,7 +15,7 @@ Our inputs to our system are
 2. A 1080p G-buffer containing world space position, world space normal, albedo, index of refraction, and specular roughness.
 
 
-The output of our system should be a single high quality 1080p ray traced image per input frame.
+The output of our system should be a single high quality (compared to a 32 spp ray-traced frame) 1080p ray traced image per input frame.
 ## Approach
 
 ### Dataset
@@ -23,13 +23,16 @@ For our dataset, we chose a single example scene from Falcor called "pink room" 
 
 The views we used for our train and validation dataset come from a single animated camera path. We did randomly shuffle the data points captured to ensure generalizability across different views of the scene. Moreover, our test set comes from an entirely different animated camera path (though it is used mostly for qualitative analysis). 
 
-We gathered 1000 data-points for our train and val set and another 150 data-points for our test. Per data-point we gather quite a deal of i
+We gathered 1000 data-points for our train and val set and another 150 data-points for our test. Per data-point we gather quite a deal of information.
+1. 540p   1spp ray-traced frame (3 channels)
+2. 1080p 1spp ray-traced frame (3 channels)
+3. 1080p 4spp ray-traced frame (3 channels)
 
 ## Results
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTA4NDk1MDUwLC0zNjMzOTMwMTUsLTc3OT
+eyJoaXN0b3J5IjpbNTM2NzcyNzUzLC0zNjMzOTMwMTUsLTc3OT
 I3MTAyNCw4MzIyMTE2NywtMTQ2NDU2OTAwNV19
 -->
