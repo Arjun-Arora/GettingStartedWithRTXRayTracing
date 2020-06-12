@@ -67,15 +67,16 @@ The first experiments we performed involved finding the right models for the tas
 
 ## Results
 
-| Column 1 | Column 2 | 
-|:--------:| -------------:|
-| centered | right-aligned |
+| Performance Results | Column 2 | Column 3 |
+|:--------:|:-------------:|:-----: |
+| Frame-time (ms)| right-aligned | yes | 
+|Frames per second         |               |     |
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTY3MDQxODc0NSwxMDgxNzg3MDg3LC0xND
+eyJoaXN0b3J5IjpbLTI2OTY2NzkzMiwxMDgxNzg3MDg3LC0xND
 U3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3MTY5MywtMzYzMzkz
 MDE1LC03NzkyNzEwMjQsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ
 ==
