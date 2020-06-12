@@ -173,7 +173,9 @@ It is possible to do DLSS. It's just incredibly difficult without a lot of compu
 
 * Generally our model does not have temporal stability issues but we do have issues in darker regions of the image such as shadows. Maybe exploring motion vectors/recurrence structure in the model could help improve the stability.
 
-* The GPU is only part of the system. When we used a VM, we ran into massive slowdows in training due to disk i/o since the storage is distributed. Quite often our compute would be left idling while the process was focused on fetching data from disk. In addition, system temperature can have a large impact on performance. After installing proper coooling on the machine with the 2070 Super, we saw a 25x in training speed.
+* Our ground truth images are actually quite noisy and this may put an upper bound on the performance of our model. Generating higher spp images comes at the cost of compute but might be necessary for better image quality.
+
+* The GPU is only part of the system. When we used a VM, we ran into massive slowdowns in training due to disk i/o since the storage is distributed. Quite often our compute would be left idling while the process was focused on fetching data from disk. In addition, system temperature can have a large impact on performance. After installing proper coooling on the machine with the 2070 Super, we saw a 25x in training speed.
 
 ### References
 1. Burnes, Andrew. “NVIDIA DLSS 2.0: A Big Leap In AI Rendering.” Artificial Intelligence Computing Leadership from NVIDIA, Nvidia, 23 Mar. 2020, www.nvidia.com/en-us/geforce/news/nvidia-dlss-2-0-a-big-leap-in-ai-rendering/.
