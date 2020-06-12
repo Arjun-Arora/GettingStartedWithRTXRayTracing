@@ -130,7 +130,7 @@ def main(seed: int,
         'input_channel_size': 14, 'output_channel_size': 3}
         assert chkpoint_folder.split('.')[-1] == 'pt', "haven't defined a checkpoint path"
         assert save_dir != None, "haven't defined a directory to save the model output"
-        run4c(save_dir, device, test_gen, chkpoint_folder, model_params)
+        run4cd(save_dir, device, test_gen, chkpoint_folder, model_params)
     elif experiment_name == 'experiment4d':
         model_params = {'input_types': [ "half","mat_diffuse", "mat_ref", "mat_spec_rough", "world_normal", "world_pos"],'upscale_factor': 1,
         'input_channel_size': 14, 'output_channel_size': 3}
