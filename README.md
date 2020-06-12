@@ -127,7 +127,7 @@ Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames
 
 Here are the results on the val set, comparing 1spp and 4spp 1080p ray traced images to 32 spp 1080p. As you can see all of our models beat these baselines handily. 
 
-#### Ray-tracing Results 
+#### Baseline Ray-Traced Results 
 |               | PSNR   |
 |---------------|--------|
 | 1spp -> 32spp | 10.472 |
