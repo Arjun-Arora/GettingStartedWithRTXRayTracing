@@ -69,17 +69,21 @@ The first experiments we performed involved finding the right models for the tas
 ## Results
 
 ### RTX 2070 Super
-### Performance results
+#### ray-tracing benchmarks
 | |530x960 1 spp|1060x1920  gbuffer|1060x1920 1spp|1060x1920 4spp|1060x1920 32spp|
 |:-:|:-:|:-:|:-:| :-: | :-: | 
 | Frame-time (ms)| 2.90  | 2.2 |6.50 |26.0 | 208 |
 |Frames per second|101|125|28.1|7.25 |.906 |
 
-### Model Benchmarking
+#### Model benchmarks
 | |Super Resolution|Denoiser|
 |:-:|:-:| :-: |
 | Inference Time (ms)|8.802| 8.320 |
-
+### Ray-tracing Results
+|               | PSNR   |
+|---------------|--------|
+| 1spp -> 32spp | 10.472 |
+| 4spp -> 32spp | 10.42  |
 ### Model Results
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
@@ -98,8 +102,8 @@ As defined in our design principles our system's success is defined by the infer
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTk3Mjg3NzQ4OCwtMTA4MzE1MTk0MiwxMD
-gxNzg3MDg3LC0xNDU3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3
-MTY5MywtMzYzMzkzMDE1LC03NzkyNzEwMjQsODMyMjExNjcsLT
-E0NjQ1NjkwMDVdfQ==
+eyJoaXN0b3J5IjpbLTEyMDE3NDI2NjAsMTk3Mjg3NzQ4OCwtMT
+A4MzE1MTk0MiwxMDgxNzg3MDg3LC0xNDU3MzAzNDUsLTEyODgw
+MTM5NjMsMTcxODM3MTY5MywtMzYzMzkzMDE1LC03NzkyNzEwMj
+QsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ==
 -->
