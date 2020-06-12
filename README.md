@@ -67,14 +67,18 @@ The first experiments we performed involved finding the right models for the tas
 
 ## Results
 
-#### RTX 2070 Super
-
-| Performance Results |530x960 1 spp|1060x1920  gbuffer|1060x1920 1spp|1060x1920 4spp|1060x1920 32spp|
+### RTX 2070 Super
+### Performance results
+| |530x960 1 spp|1060x1920  gbuffer|1060x1920 1spp|1060x1920 4spp|1060x1920 32spp|
 |:-:|:-:|:-:|:-:| :-: | :-: | 
 | Frame-time (ms)| 2.90  | 2.2 |6.50 |26.0 | 208 |
 |Frames per second|101|125|28.1|7.25 |.906 |
 
-
+### Model Benchmarking
+| |530x960 1 spp|1060x1920  gbuffer|1060x1920 1spp|1060x1920 4spp|1060x1920 32spp|
+|:-:|:-:|:-:|:-:| :-: | :-: | 
+| Frame-time (ms)| 2.90  | 2.2 |6.50 |26.0 | 208 |
+|Frames per second|101|125|28.1|7.25 |.906 |
 
 
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
@@ -82,8 +86,8 @@ As defined in our design principles our system's success is defined by the infer
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwNTIzNTY2NzYsMTA4MTc4NzA4NywtMT
-Q1NzMwMzQ1LC0xMjg4MDEzOTYzLDE3MTgzNzE2OTMsLTM2MzM5
-MzAxNSwtNzc5MjcxMDI0LDgzMjIxMTY3LC0xNDY0NTY5MDA1XX
-0=
+eyJoaXN0b3J5IjpbLTY3MTQ3MjU2MywxMDgxNzg3MDg3LC0xND
+U3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3MTY5MywtMzYzMzkz
+MDE1LC03NzkyNzEwMjQsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ
+==
 -->
