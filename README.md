@@ -17,11 +17,15 @@ Our inputs to our system are
 
 The output of our system should be a single high quality 1080p ray traced image per input frame.
 ## Approach
+
+### Dataset
+For our dataset, we chose a single example scene from Falcor called "pink room" as our test set. Since the goal of our system is to test the performance and quality of our model, not necessarily generalizability, we gathered our data from
+
 ## Results
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTc3OTI3MTAyNCw4MzIyMTE2NywtMTQ2ND
-U2OTAwNV19
+eyJoaXN0b3J5IjpbLTE1NzEyMzUxNiwtNzc5MjcxMDI0LDgzMj
+IxMTY3LC0xNDY0NTY5MDA1XX0=
 -->
