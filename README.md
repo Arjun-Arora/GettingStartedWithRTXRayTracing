@@ -75,6 +75,12 @@ The first experiments we performed involved finding the right models for the tas
 | Frame-time (ms)| 2.90  | 2.2 |6.50 |26.0 | 208 |
 |Frames per second|101|125|28.1|7.25 |.906 |
 
+
+
+##### Note: 
+All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
+
+
 #### Model benchmarks
 | |Super Resolution|Denoiser|
 |:-:|:-:| :-: |
@@ -85,6 +91,8 @@ The first experiments we performed involved finding the right models for the tas
 | 1spp -> 32spp | 10.472 |
 | 4spp -> 32spp | 10.42  |
 ### Model Results
+
+
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
 | Experiment 2a | 0.4513            | 10.45       | 0.4537            | 10.42       |
@@ -102,8 +110,8 @@ As defined in our design principles our system's success is defined by the infer
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyMDE3NDI2NjAsMTk3Mjg3NzQ4OCwtMT
-A4MzE1MTk0MiwxMDgxNzg3MDg3LC0xNDU3MzAzNDUsLTEyODgw
-MTM5NjMsMTcxODM3MTY5MywtMzYzMzkzMDE1LC03NzkyNzEwMj
-QsODMyMjExNjcsLTE0NjQ1NjkwMDVdfQ==
+eyJoaXN0b3J5IjpbMTE0MzE5MjkwOSwxOTcyODc3NDg4LC0xMD
+gzMTUxOTQyLDEwODE3ODcwODcsLTE0NTczMDM0NSwtMTI4ODAx
+Mzk2MywxNzE4MzcxNjkzLC0zNjMzOTMwMTUsLTc3OTI3MTAyNC
+w4MzIyMTE2NywtMTQ2NDU2OTAwNV19
 -->
