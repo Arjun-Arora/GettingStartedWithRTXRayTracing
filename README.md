@@ -73,6 +73,7 @@ Story: First find good models, tweak the models so that they fit in the time and
 The first experiments we performed involved finding the right models for the tasks. We ran multiple experiments and tried to find models that yielded good inference time and a low memory consumption.  
 
 ## Results
+ As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
 ### RTX 2070 Super
 #### ray-tracing benchmarks
