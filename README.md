@@ -82,7 +82,7 @@ The first experiments we performed involved finding the right models for the tas
 
 ### Model Results
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
-|---------------|-------------------|-------------|-------------------|-------------|
+|:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
 | Experiment 2a | 0.4513            | 10.45       | 0.4537            | 10.42       |
 | Experiment 2b | 0.04268           |       10.68 | 0.04248           | 10.71       |
 | Experiment 2c | 0.04134           | 10.85       | 0.04138           | 10.84       |
@@ -92,13 +92,14 @@ The first experiments we performed involved finding the right models for the tas
 | Experiment 4c | 6.9275e-3         | 10.43/21.65 | 6.5194e-3         | 10.34/21.9  |
 | Experiment 4d | 0.08276/8.2073e-3 | 10.84/20.89 | 0.08455/7.8941e-3 | 10.74/21.05 |
 
+
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTQ5NDc5MDcyLC0xMDgzMTUxOTQyLDEwOD
-E3ODcwODcsLTE0NTczMDM0NSwtMTI4ODAxMzk2MywxNzE4Mzcx
-NjkzLC0zNjMzOTMwMTUsLTc3OTI3MTAyNCw4MzIyMTE2NywtMT
-Q2NDU2OTAwNV19
+eyJoaXN0b3J5IjpbMTk3Mjg3NzQ4OCwtMTA4MzE1MTk0MiwxMD
+gxNzg3MDg3LC0xNDU3MzAzNDUsLTEyODgwMTM5NjMsMTcxODM3
+MTY5MywtMzYzMzkzMDE1LC03NzkyNzEwMjQsODMyMjExNjcsLT
+E0NjQ1NjkwMDVdfQ==
 -->
