@@ -83,44 +83,55 @@ After hitting our allocated budgets, we explored various training schemes to imp
 ## Results
 As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
 
-### RTX 2070 Super
-#### ray-tracing benchmarks
+### Model Exploration/Improving Speed
+We explored various architectures that used UNets, ResNets, Convolutional Autoencoders, etc. and finally settled on the two models described above. We timed the various models and model parameters until we converged to a configuration that fit in our budget. Below we see the timings for a given frame at fp16. The fp32 versions of these models run at a 25% performance cost in time. 
+
+| |Super Resolution|Denoiser|
+|:-:|:-:| :-: |
+| Inference Time (ms)|8.802| 8.320 |
+
+Below we see the timing results for the RTX 2070 Super for generating the data required for our models. We needed to factor these valeus since they add to the FPS cost of the overall system.
+
 | |530x960 1 spp|1060x1920  gbuffer|1060x1920 1spp|1060x1920 4spp|1060x1920 32spp|
 |:-:|:-:|:-:|:-:| :-: | :-: | 
 | Frame-time (ms)| 2.90  | 2.2 |6.50 |26.0 | 208 |
 |Frames per second|101|125|28.1|7.25 |.906 |
 
 
-
-##### Note: 
-All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
-
-
-#### Model benchmarks
-| |Super Resolution|Denoiser|
-|:-:|:-:| :-: |
-| Inference Time (ms)|8.802| 8.320 |
-#### Ray-tracing Results
-|               | PSNR   |
-|---------------|--------|
-| 1spp -> 32spp | 10.472 |
-| 4spp -> 32spp | 10.42  |
-### Model Results
-
+### Improving Bandwidth/Input Size
+We wanted to explore the impact of data types on the performance of the model. So we looked at various inputs such as half image only, half image with partial g-buffer, and half image with full g-buffer. These experiments are critical to potentially reducing the amount of memory used in VRAM since most of the memory usage is for the images. Our work didn't experiment with the denoising model since the original work used the full gbuffer.
 
 | Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
 |:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
 | Experiment 2a | 0.4513            | 10.45       | 0.4537            | 10.42       |
-| Experiment 2b | 0.04268           |       10.68 | 0.04248           | 10.71       |
+| Experiment 2b | 0.04268           | 10.68       | 0.04248           | 10.71       |
 | Experiment 2c | 0.04134           | 10.85       | 0.04138           | 10.84       |
 | Experiment 3a | 8.16e-3           | 20.89       | 7.93e-3           | 21.04       |
+
+Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
+
+
+### Improving Image Quality
+We attempted to improve image quality by trying different training procedures.
+
+| Experiments   | Train Loss        | Train PSNR  | Val Loss          | Val PSNR    |
+|:---------------:|:-------------------:|:-------------:|:-------------------:|:-------------:|
 | Experiment 4a | N/A               | N/A         | N/A               | 17.43       |
 | Experiment 4b | 0.4066/0.0149     | 10.9/18.27  | 0.0415/0.0154     | 10.82/18.15 |
 | Experiment 4c | 6.9275e-3         | 10.43/21.65 | 6.5194e-3         | 10.34/21.9  |
 | Experiment 4d | 0.08276/8.2073e-3 | 10.84/20.89 | 0.08455/7.8941e-3 | 10.74/21.05 |
 
+Note: All PSNR/loss is calculated against 1080p 32 spp ray-traced frames 
 
-As defined in our design principles our system's success is defined by the inference speed, quality of the image, and the memory consumption of the model. The metrics we would use to quantify these specs are time, psnr/qualitative inspection, and model size. Every image metric associated with quality has edge cases where it fails. Hence, we need a human in the loop to validate the quality.
+
+### Model Results
+
+#### Ray-tracing Results
+|               | PSNR   |
+|---------------|--------|
+| 1spp -> 32spp | 10.472 |
+| 4spp -> 32spp | 10.42  |
+
 
 
 
